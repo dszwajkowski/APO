@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31105.61
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApoCore", "ApoCore\ApoCore.csproj", "{1167284D-7F87-4997-AE9A-93872B85E5D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApoUI", "ApoUI\ApoUI.csproj", "{F489E710-AC8D-448F-A99F-53CDE9812816}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1167284D-7F87-4997-AE9A-93872B85E5D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1167284D-7F87-4997-AE9A-93872B85E5D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1167284D-7F87-4997-AE9A-93872B85E5D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1167284D-7F87-4997-AE9A-93872B85E5D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F489E710-AC8D-448F-A99F-53CDE9812816}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F489E710-AC8D-448F-A99F-53CDE9812816}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F489E710-AC8D-448F-A99F-53CDE9812816}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F489E710-AC8D-448F-A99F-53CDE9812816}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {22DAD44C-87CA-4C21-9F69-E2F1D5135B3F}
+	EndGlobalSection
+EndGlobal
