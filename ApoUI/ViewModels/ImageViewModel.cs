@@ -1,4 +1,5 @@
 ﻿using ApoCore;
+using ApoUI.Views;
 using LiveCharts;
 using LiveCharts.Wpf;
 using System;
@@ -17,57 +18,40 @@ namespace ApoUI.ViewModels
     public class ImageViewModel : BaseViewModel
     {
         #region Constructor
+
         /// <summary>
         /// Default Constructor
         /// </summary>
         public ImageViewModel()
         {
-            SideMenuVisible = false;
             //CurrentSideMenuContent = SideMenuModel.Histogram;
-            IsImageLoaded = false;
-
-            #region Commands
-            GetImagePathCommand = new ExecuteCommand(GetImagePath);
-            CloseImageCommand = new ExecuteCommand(CloseImage);
-            SaveImageCommand = new ExecuteCommand(SaveImage);
-            SaveAllImagesCommand = new ExecuteCommand(SaveAllImages);
-            DuplicateImageCommand = new ExecuteCommand(DuplicateImage);
-
-            OpenHistogramCommand = new ExecuteCommand(OpenHistogram);
-            GenerateHistogramCommand = new ExecuteCommand(GenerateHistogram);
-            CloseSideMenuCommand = new ExecuteCommand(CloseSideMenu);
-
-            ConvertToGrayscaleCommand = new ExecuteCommand(ConvertToGrayscale);
-            NegationCommand = new ExecuteCommand(Negation);
-            ThresholdingCommand = new ExecuteCommand(Thresholding);
-            #endregion
         }
+
         #endregion
 
-        #region Public Properties            
-        public ImageModel Image { get; set; }
-        public BitmapImage ImageTest
+        #region Public Properties   
+        
+        public ImageModel ImageModel 
         {
-            get => imagetest;
+            get => imagemodel;         
             set
             {
-                if (imagetest == value)
+                if (imagemodel == value)
                     return;
-                imagetest = value;
+                imagemodel = value;
                 OnPropertyChanged();
             }
         }
-        //public Bitmap ImageTest
-        //{
-        //    get => imagetest;
-        //    set
-        //    {
-        //        if (imagetest == value)
-        //            return;
-        //        imagetest = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
+        public Bitmap Image
+        {
+            get => image;
+            set
+            {
+                image = value;
+                UpdateHistogram();
+                OnPropertyChanged();
+            }
+        }
         public string ImagePath
         {
             get => imagepath;
@@ -75,11 +59,11 @@ namespace ApoUI.ViewModels
             {
                 if (imagepath == value)
                     return;
-                imagepath = value;
-                //PropertyChanged(this, new PropertyChangedEventArgs(nameof(ImagePath)));
+                imagepath = value;;
                 OnPropertyChanged();
             }
         }
+
         public bool IsImageLoaded
         {
             get => isimageloaded;
@@ -91,7 +75,6 @@ namespace ApoUI.ViewModels
                 OnPropertyChanged();
             }
         }
-
         public bool SideMenuVisible
         {
             get => sidemenuvisible;
@@ -103,9 +86,20 @@ namespace ApoUI.ViewModels
                 OnPropertyChanged();
             }
         }
+        public HistogramModel SelectedItem
+        {
+            get => selecteditem;
+            set
+            {
+                if (selecteditem == value)
+                    return;
+                selecteditem = value;
+                PlotHistogram(selecteditem);
+                OnPropertyChanged();
+            }
+        }
 
         // Side menu control related properties, not yet implemented
-
         //public SideMenuModel CurrentSideMenuContent
         //{
         //    get => currentsidemenucontent;
@@ -118,7 +112,8 @@ namespace ApoUI.ViewModels
         //    }
         //}
 
-        public SeriesCollection Series
+        public List<string> Labels = new List<string>();
+        public int[] Series
         {
             get => series;
             set
@@ -129,80 +124,199 @@ namespace ApoUI.ViewModels
                 OnPropertyChanged();
             }
         }
-        public List<string> Labels
-        {
-            get => labels;
-            set
-            {
-                if (labels == value)
-                    return;
-                labels = value;
-                OnPropertyChanged();
-            }
-        }
-        public Func<double, string> Formatter
-        {
-            get => formatter;
-            set
-            {
-                if (formatter == value)
-                    return;
-                formatter = value;
-                OnPropertyChanged();
-            }
-        }
 
+        public int Threshold
+        {
+            get => threshold;
+            set
+            {
+                if (threshold == value)
+                    return;
+                threshold = value;
+                Thresholding();
+                OnPropertyChanged();
+            }
+        }
+        public int ThresholdMax
+        {
+            get => thresholdmax;
+            set
+            {
+                if (thresholdmax == value)
+                    return;
+                thresholdmax = value;
+                Thresholding();
+                OnPropertyChanged();
+            }
+        }
+        public bool KeepGrayLevels
+        {
+            get => keepgraylevels;
+            set
+            {
+                if (keepgraylevels == value)
+                    return;
+                keepgraylevels = value;
+                OnPropertyChanged();
+            }
+        }
         #endregion
 
         #region Private properties
-        private string imagepath;
-        private bool isimageloaded;
-        private BitmapImage imagetest;
-        //private Bitmap imagetest;
 
+        private ImageModel imagemodel;
+        private Bitmap image;
+        private Bitmap backupimage;
+        private string imagepath;
+        private bool isimageloaded = false;
+               
+        private HistogramModel selecteditem;
+        private bool sidemenuvisible = false;
         // Side menu control related properties, not yet implemented
         //private SideMenuModel currentsidemenucontent;
 
-        private bool sidemenuvisible;
-        private SeriesCollection series;
-        private List<string> labels;
-        private Func<double, string> formatter;
+        private int[] series;
+        private int threshold = 127;
+        private int thresholdmax = 255;
+        private bool keepgraylevels = false;
         #endregion
 
         #region Public Commands
-        public ICommand GetImagePathCommand { get; set; }
-        public ICommand CloseImageCommand { get; set; }
-        public ICommand SaveImageCommand { get; set; }
-        public ICommand SaveAllImagesCommand { get; set; }
-        public ICommand DuplicateImageCommand { get; set; }
+        public ICommand GetImagePathCommand => new RelayCommand(GetImagePath);
+        public ICommand CloseImageCommand => new RelayCommand(CloseImage);
+        public ICommand SaveImageCommand => new RelayCommand(SaveImage);
+        public ICommand SaveImageAsCommand => new RelayCommand(SaveImageAs);
+        public ICommand SaveAllImagesCommand => new RelayCommand(SaveAllImages);
+        public ICommand DuplicateImageCommand => new RelayCommand(DuplicateImage);
 
-        public ICommand OpenHistogramCommand { get; set; }
-        public ICommand GenerateHistogramCommand { get; set; }
-        public ICommand CloseSideMenuCommand { get; set; }
-        public ICommand ConvertToGrayscaleCommand { get; set; }
-        public ICommand NegationCommand { get; set; }
-        public ICommand ThresholdingCommand { get; set; }
+        public ICommand OpenHistogramCommand => new RelayCommand(OpenHistogram);
+        public ICommand CloseSideMenuCommand => new RelayCommand(CloseSideMenu);
+        public ICommand ConvertToGrayscaleCommand => new RelayCommand(ConvertToGrayscale);
+        public ICommand NegationCommand => new RelayCommand(Negation);
+        public ICommand ThresholdingCommand => new RelayCommand(Thresholding);
+        public ICommand PosterizeCommand => new RelayCommand(Posterize);
+        public ICommand EqualizeCommand => new RelayCommand(Equalize);
+        public ICommand StretchCommand => new RelayCommand(Stretch);
+        public ICommand BlurCommand => new RelayCommand(Blur);
+        public ICommand GaussianBlurCommand => new RelayCommand(GaussianBlur);
+
+        public ICommand TestCommand => new RelayCommand(Test);
+        #endregion
+              
+        #region Command methods - image operations
+
+        /// <summary>
+        /// Converts colorfull image to grayscale
+        /// </summary>
+        private void ConvertToGrayscale()
+        {
+            ImageModel.ToGrayScaleLUT();
+            Image = ImageModel.Image;
+        }
+
+        /// <summary>
+        /// Performs negation operation on the image
+        /// </summary>
+        private void Negation()
+        {
+            ImageModel.Negation();
+            Image = ImageModel.Image;
+        }
+
+        /// <summary>
+        /// Performs thresholding operation on the image
+        /// </summary>
+        private void Thresholding()
+        {
+            Image = backupimage;
+            //if (KeepGrayLevels)
+            //{
+            //    ImageModel.ThresholdingKeepGrayLevels(Threshold, ThresholdMax);
+            //    Image = ImageModel.Image;
+            //}
+            //else
+            //{
+            //    ImageModel.Thresholding(Threshold);
+            //    Image = ImageModel.Image;
+            //}
+            ImageModel.Thresholding(127);
+            Image = ImageModel.Image;
+        }
+
+        private void Posterize()
+        {
+            ImageModel.Posterize();
+            Image = ImageModel.Image;
+        }
+
+        private void Equalize()
+        {
+            MessageBox.Show("Not implemented yet :(");
+        }
+
+        private void Stretch()
+        {
+            ImageModel.HistogramStretch();
+            Image = ImageModel.Image;
+        }
+
+        private void Blur()
+        {
+            ImageModel.Blur();
+            Image = ImageModel.Image;
+        }
+
+        private void GaussianBlur()
+        {
+            ImageModel.GaussianBlur();
+            Image = ImageModel.Image;
+        }
+
+        private void Test()
+        {
+            var view = new ThresholdingDialog()
+            { 
+                DataContext = this 
+            };
+            view.Show();
+        }
+
         #endregion
 
-        #region Functions
+        #region Command methods - UI
+
         /// <summary>
-        /// Open file dialog
+        /// Opens open file dialog
         /// </summary>
         private void GetImagePath()
         {
             OpenFileDialog openFile = new();
             openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-            string openedFileName;
             if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                openedFileName = openFile.FileName;
-                this.ImagePath = openedFileName;
-                this.Image = new ImageModel(ImagePath);
-                Bitmap bitmap = new(this.ImagePath);
-                this.ImageTest = new BitmapImage(new Uri(this.ImagePath));
+                ImageModel = new ImageModel(openFile.FileName);             
+                Image = ImageModel.Image;
+                //var db = new DirectBitmap(ImageModel.Image.Width, ImageModel.Image.Height);
+                //using (var g = Graphics.FromImage(ImageModel.Image))
+                //{
+                //    g.DrawImage(this.Image, 0, 0);
+                //    g.DrawImage(backupimage, 0, 0);
+                //}
+                backupimage = Image;
                 IsImageLoaded = true;
-                GenerateHistogram();
             }
+        }
+
+        /// <summary>
+        /// Puts histogram data on the chart
+        /// </summary>
+        private void PlotHistogram(HistogramModel selecteditem)
+        {
+            for (int i = 0; i <= 255; i++)
+            {
+                Labels.Add(i.ToString());
+            }
+            Series = selecteditem.PlotData;
         }
 
         /// <summary>
@@ -210,17 +324,29 @@ namespace ApoUI.ViewModels
         /// </summary>
         private void CloseImage()
         {
-            this.ImagePath = "";
-            this.ImageTest = null;
+            ImageModel.Image.Dispose();
+            this.Image.Dispose();
+            ImageModel.Image = null;
+            this.Image = null;
             SideMenuVisible = false;
             IsImageLoaded = false;
         }
 
         private void SaveImage()
         {
-            // TODO: SaveImage implementation
-            //Image.Image.Save(imagepath);
-            MessageBox.Show("Not implemented yet :(");
+            if (System.IO.File.Exists(ImageModel.ImagePath))
+                System.IO.File.Delete(ImageModel.ImagePath);
+            Image.Save(ImageModel.ImagePath);
+        }
+
+        private void SaveImageAs()
+        {
+            SaveFileDialog saveFile = new();           
+            saveFile.Filter = "JPG (*.jpg)|*.jpg|PNG (*.png)|*.png|BMP (*.bmp)|*.bmp";
+            if (saveFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Image.Save(saveFile.FileName);
+            }
         }
 
         private void SaveAllImages()
@@ -255,72 +381,17 @@ namespace ApoUI.ViewModels
         }
 
         /// <summary>
-        /// Puts histogram data on the chart
+        /// Updates histogram after performing operation on image
         /// </summary>
-        private void GenerateHistogram()
+        private void UpdateHistogram()
         {
-            // TODO: When image is loaded histogram data are calculated twice, fix this
-            Image.HistogramData.GetHistogramData();
-            Series = new SeriesCollection();
-            Labels = new List<string>();
-            ChartValues<int> cv = new ChartValues<int>();
-            foreach (var item in Image.HistogramData.ChannelRGB)
+            ImageModel.UpdateHistogramData();
+            foreach (var item in ImageModel.HistogramData)
             {
-                cv.Add(item.Value);
-                Labels.Add(item.Key.ToString());
+                if (item.Channel == SelectedItem.Channel)
+                    SelectedItem = item;
             }
-            ColumnSeries cs = new ColumnSeries()
-            {
-                Values = cv
-            };
-            cs.ColumnPadding = 0;
-            Series.Add(cs);
-            Formatter = value => value.ToString("N");
         }
-
-        public BitmapImage Convert(Bitmap src)
-        {
-            // TODO: Let viewmodel use Bitmap, create converter to BitmapImage for the View
-            MemoryStream ms = new MemoryStream();
-            ((System.Drawing.Bitmap)src).Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-            BitmapImage image = new BitmapImage();
-            image.BeginInit();
-            ms.Seek(0, SeekOrigin.Begin);
-            image.StreamSource = ms;
-            image.EndInit();
-            return image;
-        }
-
-        #region Image operations
-
-        /// <summary>
-        /// Converts colorfull image to grayscale
-        /// </summary>
-        private void ConvertToGrayscale()
-        {
-            this.ImageTest = Convert(this.Image.Image.ToGrayScale());
-            GenerateHistogram();
-        }
-
-        /// <summary>
-        /// Performs negation operation on the image
-        /// </summary>
-        private void Negation()
-        {
-            this.ImageTest = Convert(this.Image.Image.Negation());
-            GenerateHistogram();
-        }
-
-        /// <summary>
-        /// Performs thresholding operation on the image
-        /// </summary>
-        private void Thresholding()
-        {
-            // TODO: Let user choose threshold value
-            this.ImageTest = Convert(this.Image.Image.Thresholding(127));
-            GenerateHistogram();
-        }
-        #endregion
 
         #endregion
     }

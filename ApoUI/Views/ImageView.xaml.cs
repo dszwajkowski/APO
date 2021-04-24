@@ -12,6 +12,7 @@ namespace ApoUI.Views
         {
             InitializeComponent();
             this.DataContext = new ImageViewModel();
+            //this.DataContext = new WindowViewModel(this);
         }
     }
 }
