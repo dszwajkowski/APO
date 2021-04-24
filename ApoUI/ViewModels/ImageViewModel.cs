@@ -274,11 +274,11 @@ namespace ApoUI.ViewModels
 
         private void Test()
         {
-            var view = new ThresholdingDialog()
-            { 
-                DataContext = this 
-            };
-            view.Show();
+            //var view = new ThresholdingDialog()
+            //{ 
+            //    DataContext = this 
+            //};
+            //view.Show();
         }
 
         #endregion
