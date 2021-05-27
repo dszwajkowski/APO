@@ -1,23 +1,21 @@
 ﻿using ApoCore;
-using ApoUI.Views;
-using LiveCharts;
-using LiveCharts.Wpf;
-using System;
+using static ApoCore.EmguOperations;
+using static ApoCore.ImageOperations;
+using static ApoCore.ImageModel;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
+using MaterialDesignThemes.Wpf;
 
-namespace ApoUI.ViewModels
+namespace ApoUI
 {
     /// <summary>
     /// View model for image items
     /// </summary>
     public class ImageViewModel : BaseViewModel
     {
-        #region Constructor
+        #region Constructors
 
         /// <summary>
         /// Default Constructor
@@ -25,19 +23,27 @@ namespace ApoUI.ViewModels
         public ImageViewModel()
         {
             //CurrentSideMenuContent = SideMenuModel.Histogram;
+            SideMenuVisible = false;
+        }
+
+        public ImageViewModel(string imagePath)
+        {
+            ImagePath = imagePath;
+            ImageModel = new ImageModel(ImagePath);
+            Image = ImageModel.Image;
+            SelectedChannel = ImageModel.HistogramData[0];             
         }
 
         #endregion
 
         #region Public Properties   
-        
-        public ImageModel ImageModel 
+
+        public ImageModel ImageModel
         {
-            get => imagemodel;         
+            get => imagemodel;
             set
             {
-                if (imagemodel == value)
-                    return;
+                if (imagemodel == value) return;
                 imagemodel = value;
                 OnPropertyChanged();
             }
@@ -48,6 +54,7 @@ namespace ApoUI.ViewModels
             set
             {
                 image = value;
+                ImageModel.Image = image;
                 UpdateHistogram();
                 OnPropertyChanged();
             }
@@ -57,152 +64,96 @@ namespace ApoUI.ViewModels
             get => imagepath;
             set
             {
-                if (imagepath == value)
-                    return;
-                imagepath = value;;
+                if (imagepath == value) return;
+                imagepath = value; ;
                 OnPropertyChanged();
             }
         }
-
-        public bool IsImageLoaded
-        {
-            get => isimageloaded;
-            set
-            {
-                if (isimageloaded == value)
-                    return;
-                isimageloaded = value;
-                OnPropertyChanged();
-            }
-        }
+        
         public bool SideMenuVisible
         {
             get => sidemenuvisible;
             set
             {
-                if (sidemenuvisible == value)
-                    return;
+                if (sidemenuvisible == value) return;
                 sidemenuvisible = value;
                 OnPropertyChanged();
             }
         }
-        public HistogramModel SelectedItem
+        public HistogramModel SelectedChannel
         {
-            get => selecteditem;
+            get => _SelectedChannel;
             set
             {
-                if (selecteditem == value)
-                    return;
-                selecteditem = value;
-                PlotHistogram(selecteditem);
+                if (_SelectedChannel == value) return;
+                _SelectedChannel = value;
+                PlotHistogram(_SelectedChannel);
                 OnPropertyChanged();
             }
         }
-
-        // Side menu control related properties, not yet implemented
-        //public SideMenuModel CurrentSideMenuContent
-        //{
-        //    get => currentsidemenucontent;
-        //    set
-        //    {
-        //        if (currentsidemenucontent == value)
-        //            return;
-        //        currentsidemenucontent = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
         public List<string> Labels = new List<string>();
         public int[] Series
         {
             get => series;
             set
             {
-                if (series == value)
-                    return;
+                if (series == value) return;
                 series = value;
                 OnPropertyChanged();
             }
         }
 
-        public int Threshold
-        {
-            get => threshold;
-            set
-            {
-                if (threshold == value)
-                    return;
-                threshold = value;
-                Thresholding();
-                OnPropertyChanged();
-            }
-        }
-        public int ThresholdMax
-        {
-            get => thresholdmax;
-            set
-            {
-                if (thresholdmax == value)
-                    return;
-                thresholdmax = value;
-                Thresholding();
-                OnPropertyChanged();
-            }
-        }
-        public bool KeepGrayLevels
-        {
-            get => keepgraylevels;
-            set
-            {
-                if (keepgraylevels == value)
-                    return;
-                keepgraylevels = value;
-                OnPropertyChanged();
-            }
-        }
         #endregion
 
-        #region Private properties
+        #region Private fields
 
         private ImageModel imagemodel;
         private Bitmap image;
         private Bitmap backupimage;
         private string imagepath;
-        private bool isimageloaded = false;
                
-        private HistogramModel selecteditem;
+        private HistogramModel _SelectedChannel;
         private bool sidemenuvisible = false;
         // Side menu control related properties, not yet implemented
         //private SideMenuModel currentsidemenucontent;
 
         private int[] series;
-        private int threshold = 127;
-        private int thresholdmax = 255;
-        private bool keepgraylevels = false;
+
         #endregion
 
-        #region Public Commands
-        public ICommand GetImagePathCommand => new RelayCommand(GetImagePath);
-        public ICommand CloseImageCommand => new RelayCommand(CloseImage);
-        public ICommand SaveImageCommand => new RelayCommand(SaveImage);
-        public ICommand SaveImageAsCommand => new RelayCommand(SaveImageAs);
-        public ICommand SaveAllImagesCommand => new RelayCommand(SaveAllImages);
-        public ICommand DuplicateImageCommand => new RelayCommand(DuplicateImage);
+        #region Commands
 
-        public ICommand OpenHistogramCommand => new RelayCommand(OpenHistogram);
-        public ICommand CloseSideMenuCommand => new RelayCommand(CloseSideMenu);
         public ICommand ConvertToGrayscaleCommand => new RelayCommand(ConvertToGrayscale);
         public ICommand NegationCommand => new RelayCommand(Negation);
         public ICommand ThresholdingCommand => new RelayCommand(Thresholding);
         public ICommand PosterizeCommand => new RelayCommand(Posterize);
         public ICommand EqualizeCommand => new RelayCommand(Equalize);
         public ICommand StretchCommand => new RelayCommand(Stretch);
+        
         public ICommand BlurCommand => new RelayCommand(Blur);
         public ICommand GaussianBlurCommand => new RelayCommand(GaussianBlur);
+        public ICommand SobelCommand => new RelayCommand(Sobel);
+        public ICommand LaplacianCommand => new RelayCommand(Laplacian);
+        public ICommand CannyCommand => new RelayCommand(Canny);
+        public ICommand SharpeningCommand => new RelayCommand(Sharpening);
 
-        public ICommand TestCommand => new RelayCommand(Test);
+        public ICommand AddCommand => new RelayCommand(Add);
+        public ICommand SubtractCommand => new RelayCommand(Subtract);
+        public ICommand BlendCommand => new RelayCommand(Blend);
+        public ICommand AndCommand => new RelayCommand(And);
+        public ICommand OrCommand => new RelayCommand(Or);
+        public ICommand NotCommand => new RelayCommand(Not);
+        public ICommand XorCommand => new RelayCommand(XorOperation);
+
+        public ICommand MorphologyCommand => new RelayCommand(Morphology);
+        public ICommand FiltrationTwoCommand => new RelayCommand(FiltrationTwo);
+        public ICommand SkeletonCommand => new RelayCommand(Skeleton);
+
+        public ICommand OtsuThresholdingCommand => new RelayCommand(OtsuThresholding);
+        public ICommand AdaptiveThresholdingCommand => new RelayCommand(AdaptiveThresholding);
+
         #endregion
-              
+
         #region Command methods - image operations
 
         /// <summary>
@@ -210,42 +161,44 @@ namespace ApoUI.ViewModels
         /// </summary>
         private void ConvertToGrayscale()
         {
-            ImageModel.ToGrayScaleLUT();
-            Image = ImageModel.Image;
+            if (ImageModel.IsColorful == false) return;
+            else
+            {
+                ImageModel.ToGrayScale();
+                ImageModel.IsColorful = false;               
+                Image = ImageModel.Image;
+                SelectedChannel = ImageModel.HistogramData[0];
+            }           
         }
 
         /// <summary>
-        /// Performs negation operation on the image
+        /// Performs negation operation
         /// </summary>
         private void Negation()
         {
-            ImageModel.Negation();
+            ImageModel = ImageModelOperations.Negation(ImageModel);
             Image = ImageModel.Image;
         }
 
         /// <summary>
-        /// Performs thresholding operation on the image
+        /// Performs thresholding operation
         /// </summary>
-        private void Thresholding()
+        private async void Thresholding()
         {
-            Image = backupimage;
-            //if (KeepGrayLevels)
-            //{
-            //    ImageModel.ThresholdingKeepGrayLevels(Threshold, ThresholdMax);
-            //    Image = ImageModel.Image;
-            //}
-            //else
-            //{
-            //    ImageModel.Thresholding(Threshold);
-            //    Image = ImageModel.Image;
-            //}
-            ImageModel.Thresholding(127);
-            Image = ImageModel.Image;
+            backupimage = Image;
+            var view = new ThresholdingDialog()
+            {
+                DataContext = new ThresholdingOperationViewModel(this)
+            };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
         }
 
+        /// <summary>
+        /// Performs posterize operation
+        /// </summary>
         private void Posterize()
         {
-            ImageModel.Posterize();
+            ImageModel = ImageModelOperations.Posterize(ImageModel);
             Image = ImageModel.Image;
         }
 
@@ -254,58 +207,206 @@ namespace ApoUI.ViewModels
             MessageBox.Show("Not implemented yet :(");
         }
 
+        /// <summary>
+        /// Performs histogram stretching operation
+        /// </summary>
         private void Stretch()
         {
-            ImageModel.HistogramStretch();
+            ImageModel = ImageModelOperations.HistogramStretch(ImageModel);
             Image = ImageModel.Image;
         }
-
-        private void Blur()
-        {
-            ImageModel.Blur();
-            Image = ImageModel.Image;
-        }
-
-        private void GaussianBlur()
-        {
-            ImageModel.GaussianBlur();
-            Image = ImageModel.Image;
-        }
-
-        private void Test()
-        {
-            //var view = new ThresholdingDialog()
-            //{ 
-            //    DataContext = this 
-            //};
-            //view.Show();
-        }
-
-        #endregion
-
-        #region Command methods - UI
 
         /// <summary>
-        /// Opens open file dialog
+        /// Performs blur operation
         /// </summary>
-        private void GetImagePath()
+        private async void Blur()
+        {
+            backupimage = Image;
+            var view = new BorderDialog()
+            {
+                DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Blur)
+            };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+        }
+
+        /// <summary>
+        /// Performs gaussian blur operation
+        /// </summary>
+        private async void GaussianBlur()
+        {
+            backupimage = Image;
+            var view = new BorderDialog()
+            {
+                DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.GaussianBlur)
+            };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+        }
+
+        private async void Sobel()
+        {
+            backupimage = Image;
+            var view = new BorderDialog()
+            {
+                DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Sobel)
+            };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+        }
+
+        private async void Laplacian()
+        {
+            backupimage = Image;
+            var view = new BorderDialog()
+            {
+                DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Laplacian)
+            };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+        }
+
+        private void Canny()
+        {
+            ImageModel.Image = EmguOperations.Canny(ImageModel.Image);
+            Image = ImageModel.Image;
+        }
+
+        private void Sharpening()
+        {
+            ImageModel.Image = LinearSharpening(ImageModel.Image);
+            Image = ImageModel.Image;
+        }
+
+        private void Add()
         {
             OpenFileDialog openFile = new();
             openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
             if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                ImageModel = new ImageModel(openFile.FileName);             
-                Image = ImageModel.Image;
-                //var db = new DirectBitmap(ImageModel.Image.Width, ImageModel.Image.Height);
-                //using (var g = Graphics.FromImage(ImageModel.Image))
-                //{
-                //    g.DrawImage(this.Image, 0, 0);
-                //    g.DrawImage(backupimage, 0, 0);
-                //}
-                backupimage = Image;
-                IsImageLoaded = true;
+                Bitmap secondImage = new(openFile.FileName);
+                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Add, secondImage);
+                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Add, secondImage);
             }
+            Image = ImageModel.Image;
         }
+
+        private void Subtract()
+        {
+            OpenFileDialog openFile = new();
+            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
+            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Bitmap secondImage = new(openFile.FileName);
+                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Subtract, secondImage);
+                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Subtract, secondImage);
+            }
+            Image = ImageModel.Image;
+        }
+
+        private void Blend()
+        {
+            OpenFileDialog openFile = new();
+            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
+            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Bitmap secondImage = new(openFile.FileName);
+                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Blend, secondImage);
+                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Blend, secondImage);
+            }
+            Image = ImageModel.Image;
+        }
+
+        private void And()
+        {
+            OpenFileDialog openFile = new();
+            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
+            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Bitmap secondImage = new(openFile.FileName);
+                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.And, secondImage);
+                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.And, secondImage);
+            }
+            Image = ImageModel.Image;
+            //OnPropertyChanged(nameof(Image));
+        }
+
+        private void Or()
+        {
+            OpenFileDialog openFile = new();
+            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
+            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Bitmap secondImage = new(openFile.FileName);
+                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Or, secondImage);
+                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Or, secondImage);
+            }
+            Image = ImageModel.Image;
+        }
+
+        private void Not()
+        {
+            //ImageModel.Image = ImageModel.Image.ArithmeticOperations(operationType: ArithmeticOperationType.Not);
+            ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Not);
+            Image = ImageModel.Image;
+        }
+
+        private void XorOperation()
+        {
+            //var view = new PointOperationsDialog()
+            //{
+            //    DataContext = new PointOperationsViewModel(ImageModel)
+            //};
+            //view.Show();
+            OpenFileDialog openFile = new();
+            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
+            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Bitmap secondImage = new(openFile.FileName);
+                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Xor, secondImage);
+                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Xor, secondImage);
+            }
+            Image = ImageModel.Image;
+        }
+
+        private async void Morphology()
+        {
+            backupimage = Image;
+            var view = new MorphologyDialog()
+            {
+                DataContext = new MorphologyOperationViewModel(this)
+            };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);            
+        }
+
+        private void FiltrationTwo()
+        {
+            Image = FiltrationTwoStep(Image);
+        }
+
+        private async void Skeleton()
+        {
+            backupimage = Image;
+            var view = new SkeletonDialog()
+            {
+                DataContext = new SkeletonOperationViewModel(this)
+            };
+            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+        }
+
+        private void OtsuThresholding()
+        {
+            ImageModel.Image = EmguOperations.OtsuThresholding(ImageModel.Image, 126);
+            Image = ImageModel.Image;
+        }
+
+        private void AdaptiveThresholding()
+        {
+            ImageModel.Image = EmguOperations.AdaptiveThresholding(ImageModel.Image);
+            Image = ImageModel.Image;
+            //ImageModel.Image = EmguOperations.Test(ImageModel.Image);
+            //Image = ImageModel.Image;
+        }
+
+        #endregion
+
+        #region Command methods - UI related
 
         /// <summary>
         /// Puts histogram data on the chart
@@ -320,67 +421,6 @@ namespace ApoUI.ViewModels
         }
 
         /// <summary>
-        /// Closes image
-        /// </summary>
-        private void CloseImage()
-        {
-            ImageModel.Image.Dispose();
-            this.Image.Dispose();
-            ImageModel.Image = null;
-            this.Image = null;
-            SideMenuVisible = false;
-            IsImageLoaded = false;
-        }
-
-        private void SaveImage()
-        {
-            if (System.IO.File.Exists(ImageModel.ImagePath))
-                System.IO.File.Delete(ImageModel.ImagePath);
-            Image.Save(ImageModel.ImagePath);
-        }
-
-        private void SaveImageAs()
-        {
-            SaveFileDialog saveFile = new();           
-            saveFile.Filter = "JPG (*.jpg)|*.jpg|PNG (*.png)|*.png|BMP (*.bmp)|*.bmp";
-            if (saveFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                Image.Save(saveFile.FileName);
-            }
-        }
-
-        private void SaveAllImages()
-        {
-            // TODO: SaveAllImages implementation
-            MessageBox.Show("Not implemented yet :(");
-        }
-
-        private void DuplicateImage()
-        {
-            // TODO: DuplicateImage implementation
-            MessageBox.Show("Not implemented yet :(");
-        }
-
-        /// <summary>
-        /// Opens side panel 
-        /// </summary>
-        private void OpenHistogram()
-        {
-            //TODO: mutiple side panel tabs, command to open each tab
-
-            //CurrentSideMenuContent = SideMenuModel.Histogram;
-            SideMenuVisible ^= true;
-        }
-
-        /// <summary>
-        /// Closes side menu
-        /// </summary>
-        private void CloseSideMenu()
-        {
-            SideMenuVisible = false;
-        }
-
-        /// <summary>
         /// Updates histogram after performing operation on image
         /// </summary>
         private void UpdateHistogram()
@@ -388,11 +428,21 @@ namespace ApoUI.ViewModels
             ImageModel.UpdateHistogramData();
             foreach (var item in ImageModel.HistogramData)
             {
-                if (item.Channel == SelectedItem.Channel)
-                    SelectedItem = item;
+                if (item.Channel == SelectedChannel?.Channel) SelectedChannel = item;
             }
+        }
+
+        private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
+        {
+            if (eventArgs.Parameter is bool parameter &&
+                parameter == true) return;
+            else Image = backupimage;
         }
 
         #endregion
     }
 }
+
+
+// TODO: poprawic zapis, karty/konroler okien
+// https://web.csulb.edu/~pnguyen/cecs475/pdf/closingwindowmvvm.pdf

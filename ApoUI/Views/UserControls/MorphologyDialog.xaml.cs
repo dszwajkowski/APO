@@ -1,5 +1,4 @@
-﻿using ApoUI.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,17 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ApoUI.Views
+namespace ApoUI
 {
     /// <summary>
-    /// Interaction logic for ImageView2.xaml
+    /// Interaction logic for MorphologyDialog.xaml
     /// </summary>
-    public partial class ImageView2 : Page
+    public partial class MorphologyDialog : UserControl
     {
-        public ImageView2()
+        public MorphologyDialog()
         {
             InitializeComponent();
-            this.DataContext = new ImageViewModel();
         }
     }
 }

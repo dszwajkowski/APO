@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace ApoUI.ViewModels
+namespace ApoUI
 {
     public class RelayCommand : ICommand
     {

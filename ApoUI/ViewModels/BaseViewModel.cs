@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace ApoUI.ViewModels
+namespace ApoUI
 {
     /// <summary>
     /// Base view model that fires PropertyChanged events

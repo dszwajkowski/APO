@@ -18,6 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Styles\Sliders.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="Styles\Others.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="ApoUI.ThresholdingDialog"
+                          xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ApoUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Background="#263238">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    Margin="17 40 17 17">
+            <Slider Style="{StaticResource MaterialDesignDiscreteSlider}" 
+                    Width="550"
+                    Value="{Binding Threshold}"
+                    Orientation="Horizontal"                                        
+                    ToolTip="TODO"
+                    TickFrequency="10"
+                    TickPlacement="BottomRight"
+                    Minimum="0"
+                    Maximum="255"
+                    Foreground="White"
+                    />
+            <TextBox Text="{Binding Threshold}" 
+                     Margin="10 0 0 0"
+                     Foreground="White"
+                     VerticalAlignment="Bottom"/>
+        </StackPanel>
+
+        <CheckBox Grid.Row="1"
+                  IsChecked="{Binding KeepGrayLevels}"
+                  Margin="17 0 17 0"
+                  Foreground="White"                    
+                  Content="Keep gray levels" />
+
+        <StackPanel Grid.Row="2" 
+                    Margin="17 0 17 17" 
+                    Orientation="Horizontal">
+            <Slider IsEnabled="{Binding KeepGrayLevels}"
+                    Style="{StaticResource MaterialDesignDiscreteSlider}" 
+                    Width="550"
+                    Value="{Binding ThresholdMax}"
+                    Orientation="Horizontal"                                        
+                    ToolTip="TODO"
+                    TickFrequency="10"
+                    TickPlacement="BottomRight"
+                    Minimum="0"
+                    Maximum="255"
+                    Foreground="White" />
+            <TextBox Text="{Binding ThresholdMax}" 
+                     Margin="10 0 0 0" 
+                     Foreground="White"
+                     VerticalAlignment="Bottom" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="3">
+            <Button
+                IsDefault="True"
+                Foreground="White"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                ToolTip="Accept"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
+                <Button.CommandParameter>
+                    <system:Boolean>True</system:Boolean>
+                </Button.CommandParameter>
+                ACCEPT
+            </Button>
+            <Button  
+                IsCancel="True"
+                Foreground="White"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                ToolTip="Cancel"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}" >
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
+                CANCEL
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

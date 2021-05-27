@@ -1,12 +1,10 @@
-﻿
-namespace ApoCore
+﻿namespace ApoCore
 {
     public class HistogramModel
     {
         #region Public properties
 
         public ChannelModel Channel { get; private set; }
-        //public SortedDictionary<int, int> ChannelRGB { get; private set; }  = new SortedDictionary<int, int>();
         public int[] PlotData { get; private set; } = new int[256];
         public int Max { get; private set; } = 0;
         public int Min { get; private set; } = 255;
@@ -48,10 +46,6 @@ namespace ApoCore
                     if (lut[x, y] > Max) Max = lut[x, y];
                     if (lut[x, y] < Min) Min = lut[x, y];
                     PlotData[lut[x,y]]++;
-                    //if (ChannelRGB.ContainsKey(lut[x,y]))
-                    //    ChannelRGB[lut[x,y]] = ChannelRGB[lut[x,y]] + 1;
-                    //else
-                    //    ChannelRGB.Add(lut[x,y], 1);
                 }
             }
         }

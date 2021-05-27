@@ -1,28 +1,30 @@
-﻿using ApoUI.Views;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace ApoUI.ViewModels
+namespace ApoUI
 {
     /// <summary>
     /// View Model for custom window
     /// </summary>
-    public class WindowViewModel : BaseViewModel
+    public class CustomWindowViewModel : BaseViewModel
     {
         #region Constructor
+
         /// <summary>
         /// Default constructor
         /// </summary>
         /// <param name="window"></param>
-        public WindowViewModel(Window window)
+        public CustomWindowViewModel(Window window)
         {
             Window = window;
-            Page = new ImageView2();
+            //Page = new ImageView2();
+            Page = new MainPage();
             MinimizeCommand = new RelayCommand(() => Window.WindowState = WindowState.Minimized);
             MaximizeCommand = new RelayCommand(() => Window.WindowState ^= WindowState.Maximized);
             CloseCommand = new RelayCommand(() => Window.Close());
         }
+
         #endregion
 
         #region Public properties

@@ -6,21 +6,43 @@ using System.Linq;
 namespace ApoCore
 {
     /// <summary>
-    /// Extension methods for ImageModel
+    /// Operations for ImageModel
     /// </summary>
-    public static class ImageOperations
+    public static class ImageModelOperations
     {
+        /// <summary>
+        /// Converts colorfull image to grayscale
+        /// </summary>
+        /// <param name="imageModel"></param>
+        /// <returns></returns>
+        public static Bitmap ToGrayScale(this ImageModel imageModel)
+        {
+            for (int x = 0; x < imageModel.Image.Width; x++)
+            {
+                for (int y = 0; y < imageModel.Image.Height; y++)
+                {
+                    int avg = (imageModel.LutR[x,y] + imageModel.LutG[x, y] + imageModel.LutB[x, y]) / 3;
+                    imageModel.LutR[x, y] = avg;
+                    imageModel.LutG[x, y] = avg;
+                    imageModel.LutB[x, y] = avg;
+                    Color newcolor = Color.FromArgb(avg, avg, avg);
+                    imageModel.Image.SetPixel(x, y, newcolor);
+                }
+            }
+            return imageModel.Image;
+        }
+
         /// <summary>
         /// Creates negation of a image
         /// </summary>
-        /// <param name="image"></param>
+        /// <param name="imageModel"></param>
         /// <returns></returns>
-        public static Bitmap Negation(this ImageModel image)
+        public static ImageModel Negation(ImageModel imageModel)
         {
             int maxR = 0;
             int maxG = 0;
             int maxB = 0;
-            foreach (var item in image.HistogramData)
+            foreach (var item in imageModel.HistogramData)
             {
                 switch (item.Channel)
                 {
@@ -33,28 +55,31 @@ namespace ApoCore
                     case ChannelModel.Blue:
                         maxB = item.Max;
                         break;
+                    case ChannelModel.RGB:
+                        maxR = maxG = maxB = item.Max;
+                        break;
                     default:
                         break;
                 }
             }
-            for (int x = 0; x < image.Image.Width; x++)
+            for (int x = 0; x < imageModel.Image.Width; x++)
             {
-                for (int y = 0; y < image.Image.Height; y++)
+                for (int y = 0; y < imageModel.Image.Height; y++)
                 {
-                    image.LutR[x, y] = maxR - image.LutR[x, y];
-                    image.LutG[x, y] = maxG - image.LutG[x, y];
-                    image.LutB[x, y] = maxB - image.LutB[x, y];
-                    Color newcolor = Color.FromArgb(image.LutR[x, y], 
-                        image.LutG[x, y], image.LutB[x, y]);
-                    image.Image.SetPixel(x, y, newcolor);
+                    imageModel.LutR[x, y] = maxR - imageModel.LutR[x, y];
+                    imageModel.LutG[x, y] = maxG - imageModel.LutG[x, y];
+                    imageModel.LutB[x, y] = maxB - imageModel.LutB[x, y];
+                    Color newcolor = Color.FromArgb(imageModel.LutR[x, y], 
+                        imageModel.LutG[x, y], imageModel.LutB[x, y]);
+                    imageModel.Image.SetPixel(x, y, newcolor);
                 }
             }
-            return image.Image;
+            return imageModel;
         }
 
         public static Bitmap Thresholding(ImageModel image, int threshold, bool keepGrayLevels = false, int thresholdMax = 0)
         {
-            if (keepGrayLevels == true && threshold >= thresholdMax) throw new ArgumentException("threshold must be smaller that threshlodMax");
+            if (keepGrayLevels == true && threshold >= thresholdMax) throw new ArgumentException("threshold must be smaller than threshlodMax");
             if (!keepGrayLevels)
             {
                 for (int x = 0; x < image.Image.Width; x++)
@@ -108,7 +133,7 @@ namespace ApoCore
             return image.Image;
         }
 
-        public static Bitmap Posterize(this ImageModel image, int numberofbins = 8)
+        public static ImageModel Posterize(ImageModel image, int numberofbins = 8)
         {
             List<int> bins = new List<int>();
             for (int i = 0; i < numberofbins; i++)
@@ -133,43 +158,35 @@ namespace ApoCore
                     }                  
                 }
             }
-            return image.Image;
+            return image;
         }
 
-        public static Bitmap HistogramStretch(this ImageModel image, int min = 0, int max = 255)
+        public static ImageModel HistogramStretch(ImageModel imageModel, int min = 0, int max = 255)
         {
             int maxR = 0;
             int minR = 0;
-            //int maxG = 0;
-            //int maxB = 0;
-            foreach (var item in image.HistogramData)
+            foreach (var item in imageModel.HistogramData)
             {
                 switch (item.Channel)
                 {
-                    case ChannelModel.Red:
+                    case ChannelModel.RGB:
                         maxR = item.Max;
                         minR = item.Min;
                         break;
-                    //case ChannelModel.Green:
-                    //    maxG = item.Max;
-                    //    break;
-                    //case ChannelModel.Blue:
-                    //    maxB = item.Max;
-                    //    break;
                     default:
                         break;
                 }
             }
-            for (int x = 0; x < image.Image.Width; x++)
+            for (int x = 0; x < imageModel.Image.Width; x++)
             {
-                for (int y = 0; y < image.Image.Height; y++)
+                for (int y = 0; y < imageModel.Image.Height; y++)
                 {
-                    image.LutR[x, y] = ((image.LutR[x,y] - minR)*max)/(maxR-minR);
-                    Color newcolor = Color.FromArgb(image.LutR[x, y], image.LutR[x, y], image.LutR[x, y]);
-                    image.Image.SetPixel(x, y, newcolor);
+                    imageModel.LutR[x, y] = ((imageModel.LutR[x,y] - minR)*max)/(maxR-minR);
+                    Color newcolor = Color.FromArgb(imageModel.LutR[x, y], imageModel.LutR[x, y], imageModel.LutR[x, y]);
+                    imageModel.Image.SetPixel(x, y, newcolor);
                 }
             }
-            return image.Image;
+            return imageModel;
         }
 
         public static Bitmap HistogramStretchLinear(this ImageModel image, int min = 0, int max = 255)
@@ -212,22 +229,6 @@ namespace ApoCore
                 }
             }
             return image.Image;
-        }
-
-        
-        //public static Bitmap ToGrayScale(this Bitmap image)
-        //{
-        //    for (int x = 0; x < image.Width; x++)
-        //    {
-        //        for (int y = 0; y < image.Height; y++)
-        //        {
-        //            Color color = image.GetPixel(x, y);
-        //            int avg = (color.R + color.G + color.B) / 3;
-        //            Color newcolor = Color.FromArgb(avg, avg, avg);
-        //            image.SetPixel(x, y, newcolor);
-        //        }
-        //    }
-        //    return image;
-        //}
+        }     
     }
 }
