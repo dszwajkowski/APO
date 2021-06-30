@@ -1,0 +1,99 @@
+﻿<Window x:Class="ApoUI.CustomWindow"
+        xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="#263238"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ApoUI"
+        mc:Ignorable="d"
+        Title="APO" 
+        WindowStyle="None"
+        MinWidth="800"
+        MinHeight="600"
+        WindowState="Maximized">
+    
+    <Window.Resources>
+        <Style TargetType="{x:Type local:CustomWindow}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Window}">
+                        <Grid Background="#FF263238">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="{Binding TitleHeight, FallbackValue=70}" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!--#region Titlebar-->
+                            <Grid Grid.Row="0" Panel.ZIndex="1">
+                                <Grid.ColumnDefinitions>
+                                    <!--Icon-->
+                                    <ColumnDefinition Width="auto"/>
+                                    <!--Title-->
+                                    <ColumnDefinition Width="*"/>
+                                    <!--Buttons-->
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!--Icon-->
+                                <!--<Image Source="" />-->
+
+                                <!--Title-->
+                                <Viewbox Grid.Column="1" Margin="0" HorizontalAlignment="Center"
+                                         Grid.ColumnSpan="2">
+                                    <TextBlock 
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Style="{StaticResource MaterialDesignTextBlock}"
+                                        FontSize="10"
+                                        Foreground="White"
+                                        Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Title}" />
+                                </Viewbox>
+
+                                <!--#region Buttons-->
+                                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                    <Button 
+                                        Style="{StaticResource WindowControlButton}"
+                                        Content="{material:PackIcon Kind=WindowMinimize}"
+                                        Command="{Binding MinimizeCommand}" />
+                                    <Button 
+                                        Style="{StaticResource WindowControlButton}"                              
+                                        Content="{material:PackIcon Kind=WindowMaximize}"
+                                        Command="{Binding MaximizeCommand}" />
+                                    <Button                                        
+                                        Style="{StaticResource WindowControlButton}"
+                                        Content="{material:PackIcon Kind=WindowClose}"
+                                        Command="{Binding CloseCommand}" />
+                                </StackPanel>
+                                <!--#endregion-->
+
+                            </Grid>
+                            <!--#endregion-->
+
+                            <!--#region Page content-->
+                            <Grid Grid.Row="1">
+                                <ContentPresenter Content="{TemplateBinding Content}" />
+                            </Grid>
+                            <!--#endregion-->
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome 
+            ResizeBorderThickness="{Binding ResizeBorderThickness}"
+            CaptionHeight="{Binding TitleHeight}"
+            GlassFrameThickness="0" 
+            CornerRadius="0" />
+    </WindowChrome.WindowChrome>
+    
+    <Grid>
+        <Frame x:Name="CustomWindowFrame" 
+               Content="{Binding Path=Page, Mode=TwoWay}" />
+    </Grid>
+</Window>
