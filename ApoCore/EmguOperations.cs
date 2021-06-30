@@ -1,14 +1,25 @@
 ﻿using Emgu.CV;
-using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
+using Emgu.CV.IntensityTransform;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 
 namespace ApoCore
 {
+    /// <summary>
+    /// Static methods allowing performing different operations on Bitmap using EmguCV library
+    /// </summary>
     public static class EmguOperations
     {
+        /// <summary>
+        /// Blurs image
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="border"></param>
+        /// <returns></returns>
         public static Bitmap Blur(Bitmap image, BorderType border = BorderType.Default)
         {
             Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
@@ -17,18 +28,32 @@ namespace ApoCore
             return image;
         }
 
+        /// <summary>
+        /// Blurs image (gaussian)
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
         public static Bitmap GaussianBlur(Bitmap image, BorderType borderType = BorderType.Default)
         {
             Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
+            // sigmaX = 0 - calculates based on kernel size
             CvInvoke.GaussianBlur(myImage, myImage, new Size(5, 5), 0, borderType: borderType);
             image = myImage.ToBitmap<Bgr, byte>();
             return image;
         }
 
+        /// <summary>
+        /// Edge detection using Sobel
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
         public static Bitmap Sobel(Bitmap image, BorderType borderType = BorderType.Isolated)
         {
             Image<Bgr, Byte> imageX = image.ToImage<Bgr, Byte>();
             Image<Bgr, Byte> imageY = image.ToImage<Bgr, Byte>();
+            // TODO wyświetlić wybrany przez użytkownika
             CvInvoke.Sobel(imageX, imageX, DepthType.Cv8U, 1, 0, borderType: borderType);
             CvInvoke.Sobel(imageY, imageY, DepthType.Cv8U, 0, 1, borderType: borderType);
             //Image<Bgr, Byte> imageResult = new Image<Bgr, byte>(image.Size);
@@ -37,6 +62,12 @@ namespace ApoCore
             return image;
         }
 
+        /// <summary>
+        /// Edge detection using Laplacian
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
         public static Bitmap Laplacian(Bitmap image, BorderType borderType = BorderType.Isolated)
         {
             Image<Gray, Byte> _image = image.ToImage<Gray, Byte>();
@@ -45,27 +76,56 @@ namespace ApoCore
             return image;
         }
 
+        /// <summary>
+        /// Edge detection using Canny
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="threshold1"></param>
+        /// <param name="threshold2"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
         public static Bitmap Canny(Bitmap image, int threshold1 = 100, int threshold2 = 200, BorderType borderType = BorderType.Isolated)
         {
-            // TODO detect if grayscale or not
             Image<Gray, Byte> _image = image.ToImage<Gray, Byte>();
-            //Image<Gray, Byte> imageResult = new Image<Gray, byte>(image.Size);
             CvInvoke.Canny(_image, _image, threshold1, threshold2);
             image = _image.ToBitmap<Gray, byte>();
             return image;
         }
-        // TODO: Lab3 borderType - isolated, reflect, repliacte
-        public static Bitmap LinearSharpening(Bitmap image, BorderType borderType = BorderType.Isolated)
+
+        /// <summary>
+        /// Sharpens image (linear)
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="mask"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
+        public static Bitmap LinearSharpening(Bitmap image, float[,] mask, BorderType borderType = BorderType.Isolated)
         {
             Image<Bgr, Byte> _image = image.ToImage<Bgr, Byte>();
-            //Image<Bgr, Byte> imageResult = new Image<Bgr, byte>(image.Size);
-            float[,] m = { { 0, -1, 0 }, { -1, 5, -1 }, { 0, -1, 0 } };
-            var mask = new ConvolutionKernelF(m);
-            CvInvoke.Filter2D(_image, _image, mask, new Point(-1, -1), borderType: borderType);
+            var m = new ConvolutionKernelF(mask);
+            CvInvoke.Filter2D(_image, _image, m, new Point(-1, -1), borderType: borderType);
             image = _image.ToBitmap<Bgr, byte>();
             return image;
         }
-        // TODO: Lab3 borderType - isolated, reflect, repliacte
+
+        /// <summary>
+        /// Blurs image (median blur)
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static Bitmap MedianBlur(Bitmap image, int size = 3)
+        {
+            if (size < 1) throw new ArgumentOutOfRangeException("Size must be equal or greater than 1.");
+            Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
+            CvInvoke.MedianBlur(myImage, myImage, size);
+            image = myImage.ToBitmap<Bgr, byte>();
+            return image;
+        }
+
+        /// <summary>
+        /// Enum of supported arithmetic operations
+        /// </summary>
         public enum ArithmeticOperationType
         {
             Add,
@@ -77,6 +137,13 @@ namespace ApoCore
             Blend,
         }
 
+        /// <summary>
+        /// Performs all arithmetic operations from <see cref="ArithmeticOperationType"/> 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="operationType"></param>
+        /// <param name="secondimage"></param>
+        /// <returns></returns>
         public static Bitmap ArithmeticOperations(Bitmap image, ArithmeticOperationType operationType, Bitmap secondimage = null)
         {
             Image<Bgr, Byte> mainImage = image.ToImage<Bgr, Byte>();
@@ -98,7 +165,7 @@ namespace ApoCore
                         CvInvoke.Subtract(mainImage, secondImage, mainImage);
                         break;
                     case ArithmeticOperationType.Blend:
-                        //CvInvoke.BlendLinear(mainImage, secondImage, mainImage); 
+                        CvInvoke.AddWeighted(mainImage, 0.7, secondImage, 0.5, -100, mainImage);
                         break;
                     case ArithmeticOperationType.And:
                         CvInvoke.BitwiseAnd(mainImage, secondImage, mainImage);
@@ -124,62 +191,121 @@ namespace ApoCore
             return image;
         }
 
-        // TODO: Lab3 ArithmeticOperationType
+        /// <summary>
+        /// Enum of supported kernel shapes
+        /// </summary>
+        public enum KernelShape
+        {
+            Cross,
+            Rectangle,
+            Square,
+            Rhombus,
+        }
 
+        /// <summary>
+        /// Performs different morphology operations
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="operationtype"></param>
+        /// <param name="kernelShape"></param>
+        /// <param name="iterations"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
+        //public static Bitmap MorphologyOperations(Bitmap image, MorphOp operationtype = MorphOp.Erode, KernelShape kernelShape =
+        //    KernelShape.Square, int iterations = 2, BorderType borderType = BorderType.Isolated)
+        //{
+        //    Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
+        //    Point point = new Point(-1, -1);
+        //    Size size = new Size(3, 3);
+        //    Mat kernel = new Mat();
+        //    switch (kernelShape)
+        //    {
+        //        case KernelShape.Cross:
+        //            kernel = CvInvoke.GetStructuringElement(ElementShape.Cross, size, point);
+        //            break;
+        //        case KernelShape.Rectangle:
+        //            kernel = CvInvoke.GetStructuringElement(ElementShape.Rectangle, size, point);
+        //            break;
+        //        case KernelShape.Square:
+        //            kernel = new Mat(3, 3, DepthType.Cv8U, 1);
+        //            break;
+        //        case KernelShape.Rhombus:
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //    CvInvoke.MorphologyEx(myImage, myImage, operationtype, kernel, point, iterations, borderType, new MCvScalar());
+        //    image = myImage.ToBitmap<Bgr, byte>();
+        //    return image;
+        //}
+
+        /// <summary>
+        /// Performs different morphology operations
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="operationtype"></param>
+        /// <param name="kernelShape"></param>
+        /// <param name="iterations"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
         public static Bitmap MorphologyOperations(Bitmap image, MorphOp operationtype = MorphOp.Erode, ElementShape elementShape =
-            ElementShape.Rectangle, int iterations = 2, BorderType borderType = BorderType.Isolated)
+            ElementShape.Cross, int iterations = 2, BorderType borderType = BorderType.Isolated)
         {
             Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
             Point point = new Point(-1, -1);
-            Mat kernel = CvInvoke.GetStructuringElement(elementShape, new Size(3, 3), point);
+            Size size = new Size(3, 3);
+            Mat kernel = CvInvoke.GetStructuringElement(elementShape, size, point);
             CvInvoke.MorphologyEx(myImage, myImage, operationtype, kernel, point, iterations, borderType, new MCvScalar());
             image = myImage.ToBitmap<Bgr, byte>();
             return image;
         }
 
-        // TODO: Lab4 ArithmeticOperationType - erozja, dylatacja, otwarcia, zamknięcia, ElementShape - romb, kwadrat, iterations - 1-x, borderType - isolated, reflect, repliacte
-
-        public static Bitmap FiltrationOneStep(Bitmap image, BorderType borderType = BorderType.Replicate)
-        {
-            throw new NotImplementedException();
-            Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
-            Point point = new Point(-1, -1);
-            float[,] m1 = { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } };
-            float[,] m2 = { { 1, -2, 1 }, { -2, 4, -2 }, { 1, -2, 1 } };
-            // TODO konvolution
-            //Convolution 
-            var mask = new ConvolutionKernelF(m1);
-            CvInvoke.Filter2D(myImage, myImage, mask, point, borderType: borderType);
-            image = myImage.ToBitmap<Bgr, byte>();
-            return image;
-            //Matrix.Create()
-            //Accord.Math.
-        }
-
-        // TODO: Lab4 borderType - isolated, reflect, repliacte
-
-        public static Bitmap FiltrationTwoStep(Bitmap image, BorderType borderType = BorderType.Replicate)
+        /// <summary>
+        /// Filtration of an image
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="mask"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
+        public static Bitmap FiltrationOneStep(Bitmap image, float[,] mask, BorderType borderType = BorderType.Replicate)
         {
             Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
-            Point point = new Point(-1, -1);
-            float[,] m1 = { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } };
-            float[,] m2 = { { 1, -2, 1 }, { -2, 4, -2 }, { 1, -2, 1 } };                    
-            var mask1 = new ConvolutionKernelF(m1);
-            CvInvoke.Filter2D(myImage, myImage, mask1, point, borderType: borderType);
-            var mask2 = new ConvolutionKernelF(m2);
-            CvInvoke.Filter2D(myImage, myImage, mask2, point, borderType: borderType);
+            var m1 = new ConvolutionKernelF(mask);
+            CvInvoke.Filter2D(myImage, myImage, m1, new Point(-1, -1), borderType: borderType);
             image = myImage.ToBitmap<Bgr, byte>();
             return image;
-            //Matrix.Create()
-            //Accord.Math.
         }
 
-        // TODO: Lab4 borderType - isolated, reflect, repliacte
+        /// <summary>
+        /// Two step filtration of an image (1st step - smoothing, 2nd - sharpening)
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="mask1"></param>
+        /// <param name="mask2"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
+        public static Bitmap FiltrationTwoStep(Bitmap image, float[,] mask1, float[,] mask2, BorderType borderType = BorderType.Replicate)
+        {
+            Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
+            var m1 = new ConvolutionKernelF(mask1);
+            CvInvoke.Filter2D(myImage, myImage, m1, new Point(-1, -1), borderType: borderType);
+            var m2 = new ConvolutionKernelF(mask2);
+            CvInvoke.Filter2D(myImage, myImage, m2, new Point(-1, -1), borderType: borderType);
+            image = myImage.ToBitmap<Bgr, byte>();
+            return image;
+        }
 
+        /// <summary>
+        /// Performs skeleton operation on image
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="elementShape"></param>
+        /// <param name="iterations"></param>
+        /// <param name="borderType"></param>
+        /// <returns></returns>
         public static Bitmap Skeleton(Bitmap image, ElementShape elementShape = ElementShape.Cross, int iterations = 2,
             BorderType borderType = BorderType.Isolated)
         {
-            // TODO check if image is binary
             Bitmap im_copy = image;
             Bitmap skel = new Bitmap(image.Width, image.Height);
             while (true)
@@ -194,10 +320,18 @@ namespace ApoCore
             }
             return skel;
         }
-        // TODO: Lab4 ElementShape - romb, kwadrat, borderType - isolated, reflect, repliacte
 
-
-        public static Bitmap AdaptiveThresholding(Bitmap image, double maxValue = 255, int blockSize = 11, 
+        /// <summary>
+        /// Performs adaptive thresholding operation on image
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="maxValue"></param>
+        /// <param name="blockSize"></param>
+        /// <param name="adaptiveType"></param>
+        /// <param name="thresholdType"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static Bitmap AdaptiveThresholding(Bitmap image, double maxValue = 255, int blockSize = 11,
             AdaptiveThresholdType adaptiveType = AdaptiveThresholdType.MeanC, ThresholdType thresholdType = ThresholdType.Binary, double param = 5)
         {
             Image<Gray, Byte> myImage = image.ToImage<Gray, Byte>();
@@ -206,47 +340,105 @@ namespace ApoCore
             return image;
         }
 
-        // TODO: Lab5 maxValue?, blockSize!, AdaptiveThresholdType - MeanC, Gauss,
-
-        public static Bitmap OtsuThresholding(Bitmap image, double threshold, double maxValue = 255)
+        /// <summary>
+        /// Performs otsu thresholding operation on image
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="threshold"></param>
+        /// <param name="useGaussianBlur"></param>
+        /// <param name="maxValue"></param>
+        /// <returns></returns>
+        public static Bitmap OtsuThresholding(Bitmap image, double threshold, bool useGaussianBlur = false, double maxValue = 255)
         {
+            if (useGaussianBlur) image = GaussianBlur(image);
             Image<Gray, Byte> myImage = image.ToImage<Gray, Byte>();
             CvInvoke.Threshold(myImage, myImage, threshold, maxValue, ThresholdType.Otsu);
             image = myImage.ToBitmap<Gray, byte>();
             return image;
         }
-        
-        public static Bitmap Test(Bitmap image)
+
+        /// <summary>
+        /// Performs watershed operation
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        public static Bitmap Watershed(Bitmap image)
         {
-            Image<Bgr, Byte> myImage = image.ToImage<Bgr, Byte>();
-            Image<Gray, Byte> grayscaleImage = image.ToImage<Gray, Byte>();
-            CvInvoke.CvtColor(myImage, grayscaleImage, ColorConversion.Bgr2Gray);
+            Mat myImage_mat = image.ToMat();
+            // remove alpha channel
+            if(myImage_mat.NumberOfChannels == 4) CvInvoke.CvtColor(myImage_mat, myImage_mat, ColorConversion.Bgra2Bgr);
+            // if image is one channel convert to 3 channel image
+            if (myImage_mat.NumberOfChannels == 1) CvInvoke.CvtColor(myImage_mat, myImage_mat, ColorConversion.Gray2Bgr);
+            Mat originalImage = myImage_mat.Clone();
+                       
+            originalImage.ConvertTo(originalImage, DepthType.Cv8U);
+            Mat grayscaleImage_mat = image.ToMat();
+            CvInvoke.CvtColor(myImage_mat, grayscaleImage_mat, ColorConversion.Bgr2Gray);
 
-            Image<Gray, Byte> thresh = new Image<Gray, byte>(grayscaleImage.Size);
-            CvInvoke.Threshold(grayscaleImage, thresh, 0, 255, ThresholdType.Otsu);
+            Mat thresh_mat = new Mat();
+            CvInvoke.Threshold(grayscaleImage_mat, thresh_mat, 0, 255, ThresholdType.BinaryInv | ThresholdType.Otsu);
 
-            Image<Gray, Byte> opening = new Image<Gray, byte>(grayscaleImage.Size);
+            Mat opening_mat = new Mat();
             Point point = new Point(-1, -1);
             Mat kernel = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(3, 3), point);
-            CvInvoke.MorphologyEx(thresh, opening, MorphOp.Open, kernel, point, 1,
-                BorderType.Default, new MCvScalar());
-            
-            Image<Gray, Byte> sure_bg = new Image<Gray, byte>(grayscaleImage.Size);
-            CvInvoke.Dilate(opening, sure_bg, kernel, point, 1, BorderType.Default,
-                new MCvScalar());
+            CvInvoke.MorphologyEx(thresh_mat, opening_mat, MorphOp.Open, kernel, point, 1, BorderType.Default, new MCvScalar());
 
-            Image<Gray, Byte> dist_transform = new Image<Gray, byte>(grayscaleImage.Size);
-            //Image<Gray, Byte> labels = new Image<Gray, byte>(grayscaleImage.Size);
-            CvInvoke.DistanceTransform(opening, dist_transform, null, DistType.L1, 5);
+            Mat sure_bg_mat = new Mat();
+            CvInvoke.Dilate(opening_mat, sure_bg_mat, kernel, point, 1, BorderType.Default, new MCvScalar());
 
-            image = dist_transform.ToBitmap<Gray, byte>();
-            return image;
+            Mat dist_transform_mat = new Mat();
+            CvInvoke.DistanceTransform(opening_mat, dist_transform_mat, null, DistType.L2, 5);
+
+            Mat sure_fg_mat = new Mat();
+            double[] min, max;
+            Point[] minLoc, maxLoc;
+            dist_transform_mat.MinMax(out min, out max, out minLoc, out maxLoc);
+            CvInvoke.Threshold(dist_transform_mat, sure_fg_mat, 0.5 * max[0], 255, ThresholdType.Binary);
+
+            Mat unknown = new Mat();
+            sure_fg_mat.ConvertTo(sure_fg_mat, DepthType.Cv8U);
+            CvInvoke.Subtract(sure_bg_mat, sure_fg_mat, unknown);
+
+            Mat markers = new Mat();
+            CvInvoke.ConnectedComponents(sure_fg_mat, markers);
+
+            //double[] minMarkers, maxMarkers;
+            //Point[] minLocMarkers, maxLocMarkers;
+            // maks = objects found
+            //markers.MinMax(out minMarkers, out maxMarkers, out minLocMarkers, out maxLocMarkers);
+            originalImage.ConvertTo(originalImage, DepthType.Cv8U);
+            markers.ConvertTo(markers, DepthType.Cv32S);
+            CvInvoke.Watershed(originalImage, markers);
+            Image<Gray, byte> boundaries = markers.ToImage<Gray, Int32>().Convert<byte>(delegate (Int32 x)
+            {
+                return (byte)(x == -1 ? 255 : 0);
+            });
+            boundaries._Dilate(1);
+            Image<Bgr, byte> img = myImage_mat.ToImage<Bgr, byte>();
+            img.SetValue(new Bgr(0, 0, 255), boundaries);
+            return img.ToBitmap();
         }
-        // TODO: Lab5 maxValue?, threshold
-    }
-}
 
-//Border type
-//Może size
-//Kernel
-//Element shape
+        /// <summary>
+        /// Returns moments of image and all contours
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="retrievalMode"></param>
+        /// <param name="approxMethod"></param>
+        /// <returns></returns>
+        public static (Moments moments, VectorOfVectorOfPoint contours) FeatureVector(Bitmap image, RetrType retrievalMode = RetrType.Ccomp,
+            ChainApproxMethod approxMethod = ChainApproxMethod.ChainApproxNone)
+        {
+            Image<Gray, Byte> myImage = image.ToImage<Gray, Byte>();
+            CvInvoke.Threshold(myImage, myImage, 127, 255, ThresholdType.Binary);
+
+            // find countours
+            VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
+            Mat hierarchy = new Mat();
+            CvInvoke.FindContours(myImage, contours, hierarchy, retrievalMode, approxMethod);
+            // calculate moments
+            Moments moments = CvInvoke.Moments(myImage, true);
+            return (moments, contours);
+        }
+    }
+ }

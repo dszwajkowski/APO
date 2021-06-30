@@ -11,73 +11,61 @@
              d:DesignHeight="450" d:DesignWidth="800"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
              Background="#263238">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-        </Grid.ColumnDefinitions>
+    <Grid Margin="17">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0"
-                    Orientation="Horizontal"
-                    Margin="17 40 0 17">
+                    Orientation="Horizontal">
             <ComboBox 
                     Margin="0 0 17 0"
-                    Width="72"                                  
+                    Width="78"                                  
                     HorizontalAlignment="Left"
                     Foreground="White"
                     material:HintAssist.Hint="Operation"
-                    material:HintAssist.HelperText="Select operation"
+                    material:HintAssist.HelperText="Choose operation"
                     ItemsSource="{Binding MorphOpList}"
                     SelectedItem="{Binding MorphOp, Mode=TwoWay}"                                   
                     IsSynchronizedWithCurrentItem="True">
             </ComboBox>
-
             <ComboBox 
                     Margin="0 0 17 0"
                     Width="70"                                  
                     HorizontalAlignment="Left"
                     Foreground="White"
                     material:HintAssist.Hint="Shape"
-                    material:HintAssist.HelperText="Select shape"
+                    material:HintAssist.HelperText="Choose shape"
                     ItemsSource="{Binding ElementShapeList}"
                     SelectedItem="{Binding ElementShape, Mode=TwoWay}"                                   
                     IsSynchronizedWithCurrentItem="True">
             </ComboBox>
-
             <ComboBox 
                     Margin="0 0 17 0"
                     Width="70"                                  
                     HorizontalAlignment="Left"
                     Foreground="White"
                     material:HintAssist.Hint="Border"
-                    material:HintAssist.HelperText="Select border"
+                    material:HintAssist.HelperText="Choose border"
                     ItemsSource="{Binding BorderTypeList}"
                     SelectedItem="{Binding BorderType, Mode=TwoWay}"                                   
                     IsSynchronizedWithCurrentItem="True">
             </ComboBox>
-
             <ComboBox 
-                    Margin="0 0 17 0"
-                    Width="70"                                  
+                    Width="77"                                  
                     HorizontalAlignment="Left"
                     Foreground="White"
                     material:HintAssist.Hint="Iterations"
-                    material:HintAssist.HelperText="Select iterations"
+                    material:HintAssist.HelperText="Choose iterations"
                     ItemsSource="{Binding IterationsList}"
                     SelectedItem="{Binding Iterations, Mode=TwoWay}"                                   
                     IsSynchronizedWithCurrentItem="True">
             </ComboBox>
-
         </StackPanel>
 
         <StackPanel Grid.Row="1"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="3">
+                    Margin="0 17 0 0">
             <Button
                 IsDefault="True"
                 Foreground="White"

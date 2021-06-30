@@ -1,22 +1,23 @@
 ﻿using ApoCore;
 using Emgu.CV.CvEnum;
 using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Windows.Input;
 
 namespace ApoUI
 {
     /// <summary>
-    /// View model for image items
+    /// View model for skeleton operation dialog
     /// </summary>
     public class SkeletonOperationViewModel : BaseViewModel
     {
         #region Constructor
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="window"></param>
         public SkeletonOperationViewModel(ImageViewModel window)
         {
             this.Parent = window;
-            backupimage = Parent.Image;
 
             ElementShapeList = new ObservableCollection<ElementShape>()
             {
@@ -33,23 +34,17 @@ namespace ApoUI
             {
                 1, 2, 3, 4, 5, 6, 7, 8, 
             };
+            Skeleton();
         }
 
         #endregion
 
         #region Public Properties   
 
+        // viewmodel that opened dialog that uses this viewmodel
         public ImageViewModel Parent;
-        public Bitmap Image
-        {
-            get => image;
-            set
-            {
-                image = value;
-                Parent.Image = Image;
-            }
-        }
 
+        // currently selected kernel shape
         public ElementShape ElementShape
         {
             get => elementshape;
@@ -61,8 +56,9 @@ namespace ApoUI
                 Skeleton();
             }
         }
+        // list of all supported kernel shapes
         public ObservableCollection<ElementShape> ElementShapeList { get; set; } 
-
+        // currently selected border
         public BorderType BorderType
         {
             get => bordertype;
@@ -74,8 +70,9 @@ namespace ApoUI
                 Skeleton();
             }
         }
+        // list of all supported border types
         public ObservableCollection<BorderType> BorderTypeList { get; set; }
-
+        // currently selected iteration amount
         public int Iterations
         {
             get => iterations;
@@ -87,14 +84,12 @@ namespace ApoUI
                 Skeleton();
             }
         }
+        // list of all possible iteration amounts
         public ObservableCollection<int> IterationsList { get; set; } 
 
         #endregion
 
         #region Private properties
-
-        private Bitmap image;
-        private Bitmap backupimage;
 
         private int iterations = 3;
         private ElementShape elementshape = ElementShape.Cross;
@@ -102,19 +97,17 @@ namespace ApoUI
 
         #endregion
 
+        #region Methods
 
-        public ICommand SkeletonCommand => new RelayCommand(Skeleton);
-        public ICommand CancelCommand => new RelayCommand(Cancel);
-
+        /// <summary>
+        /// Performs skeleton operation
+        /// </summary>
         private void Skeleton()
         {
-            Image = backupimage;
-            Image = EmguOperations.Skeleton(Image, ElementShape, Iterations, BorderType);
+            Parent.Image = Parent.backupimage;
+            Parent.Image = EmguOperations.Skeleton(Parent.Image, ElementShape, Iterations, BorderType);
         }
 
-        private void Cancel()
-        {
-            Parent.Image = backupimage;
-        }
+        #endregion
     }
 }

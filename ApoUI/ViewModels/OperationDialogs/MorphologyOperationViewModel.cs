@@ -1,8 +1,6 @@
 ﻿using ApoCore;
 using Emgu.CV.CvEnum;
 using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Windows.Input;
 
 namespace ApoUI
 {
@@ -12,10 +10,14 @@ namespace ApoUI
     public class MorphologyOperationViewModel
     {
         #region Constructor
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="window"></param>
         public MorphologyOperationViewModel(ImageViewModel window)
         {
             this.Parent = window;
-            _UneditedImage = Parent.Image;
 
             MorphOpList = new ObservableCollection<MorphOp>()
             {
@@ -29,6 +31,13 @@ namespace ApoUI
                 ElementShape.Cross,
                 ElementShape.Rectangle,
             };
+            //KernelShapeList = new ObservableCollection<KernelShape>()
+            //{
+            //    KernelShape.Rectangle,
+            //    KernelShape.Cross,
+            //    KernelShape.Square,
+            //    KernelShape.Rhombus,
+            //};
             BorderTypeList = new ObservableCollection<BorderType>()
             {
                 BorderType.Isolated,
@@ -39,14 +48,17 @@ namespace ApoUI
             {
                 1, 2, 3, 4, 5, 6, 7, 8, 
             };
+            Morphology();
         }
 
         #endregion
 
         #region Public Properties   
 
+        // viewmodel that opened dialog that uses this viewmodel
         public ImageViewModel Parent;
 
+        // currently selected operation
         public MorphOp MorphOp
         {
             get => morphop;
@@ -58,8 +70,9 @@ namespace ApoUI
                 Morphology();
             }
         }
+        // list of all supported operations
         public ObservableCollection<MorphOp> MorphOpList { get; set; }
-
+        // currently selected kernel shape
         public ElementShape ElementShape
         {
             get => elementshape;
@@ -71,8 +84,10 @@ namespace ApoUI
                 Morphology();
             }
         }
-        public ObservableCollection<ElementShape> ElementShapeList { get; set; } 
+        // list of all suported kernel shapes
+        public ObservableCollection<ElementShape> ElementShapeList { get; set; }
 
+        // currently selected border
         public BorderType BorderType
         {
             get => bordertype;
@@ -84,8 +99,10 @@ namespace ApoUI
                 Morphology();
             }
         }
+        // list of all supported border types
         public ObservableCollection<BorderType> BorderTypeList { get; set; }
 
+        // currently selected amount of iterations
         public int Iterations
         {
             get => iterations;
@@ -97,13 +114,13 @@ namespace ApoUI
                 Morphology();
             }
         }
+        // list of supported iteration amounts
         public ObservableCollection<int> IterationsList { get; set; } 
 
         #endregion
 
         #region Private fields
 
-        private Bitmap _UneditedImage;
         private int iterations = 3;
         private MorphOp morphop = MorphOp.Erode;
         private ElementShape elementshape = ElementShape.Cross;
@@ -111,12 +128,14 @@ namespace ApoUI
 
         #endregion
 
-        public ICommand MorphologyCommand => new RelayCommand(Morphology);
+        #region Methods
 
         private void Morphology()
         {
-            Parent.Image = _UneditedImage;
+            Parent.Image = Parent.backupimage;
             Parent.Image = EmguOperations.MorphologyOperations(Parent.Image, MorphOp, ElementShape, Iterations, BorderType);
         }
+
+        #endregion
     }
 }

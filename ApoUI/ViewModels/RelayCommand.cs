@@ -3,6 +3,9 @@ using System.Windows.Input;
 
 namespace ApoUI
 {
+    /// <summary>
+    /// Relays commands from ViewModels
+    /// </summary>
     public class RelayCommand : ICommand
     {
         private Action action;

@@ -1,0 +1,86 @@
+﻿<UserControl x:Class="ApoUI.StretchingDialog"
+                          xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ApoUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Background="#263238">
+    <Grid Margin="17 0 17 17">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    Margin="0 0 0 17">
+            <Slider Style="{StaticResource MaterialDesignDiscreteSlider}" 
+                    Width="550"
+                    Value="{Binding P1, Mode=OneWay}"
+                    PreviewMouseUp="Slider_PreviewMouseUp_P1"    
+                    Orientation="Horizontal"                                        
+                    ToolTip="Choose window size"
+                    TickFrequency="10"
+                    TickPlacement="BottomRight"
+                    Minimum="0"
+                    Maximum="254"
+                    Foreground="White"/>
+            <TextBox Text="{Binding P1, Mode=TwoWay, Delay=300, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="10 0 0 0"
+                     Foreground="White"
+                     VerticalAlignment="Bottom"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal">
+            <Slider Style="{StaticResource MaterialDesignDiscreteSlider}" 
+                    Width="550"
+                    Value="{Binding P2, Mode=OneWay, FallbackValue=255}"
+                    PreviewMouseUp="Slider_PreviewMouseUp_P2"
+                    Orientation="Horizontal"                                        
+                    ToolTip="Choose window size"
+                    TickFrequency="10"
+                    TickPlacement="BottomRight"
+                    Minimum="1"
+                    Maximum="255"
+                    Foreground="White"/>
+            <TextBox Text="{Binding P2, Mode=TwoWay, Delay=300, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="10 0 0 0"
+                     Foreground="White"
+                     VerticalAlignment="Bottom"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2"
+                    Margin="0 17 0 0">
+            <Button
+                IsDefault="True"
+                Foreground="White"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                ToolTip="Accept"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
+                <Button.CommandParameter>
+                    <system:Boolean>True</system:Boolean>
+                </Button.CommandParameter>
+                ACCEPT
+            </Button>
+            <Button  
+                IsCancel="True"
+                Foreground="White"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                ToolTip="Cancel"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}" >
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
+                CANCEL
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

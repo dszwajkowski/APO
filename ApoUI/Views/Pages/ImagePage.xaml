@@ -39,8 +39,9 @@
         <!--#region Side Panel-->
         <ContentControl Grid.Column="1"
                         Visibility="Visible">
-            <local:HistogramControl 
-                Visibility="{Binding SideMenuVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <local:HistogramControl />
+
+            <!--Visibility="{Binding SideMenuVisible, Converter={StaticResource BooleanToVisibilityConverter}}"-->
         </ContentControl>
         <!--#endregion-->
     </Grid>

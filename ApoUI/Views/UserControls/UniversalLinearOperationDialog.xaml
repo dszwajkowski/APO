@@ -1,0 +1,129 @@
+﻿<UserControl x:Class="ApoUI.UniversalLinearOperationDialog"
+             xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Background="#263238"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ApoUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             MinWidth="200">
+    <Grid Margin="17">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0" Orientation="Vertical">
+            <ComboBox                 
+                Margin="0 0 0 17"
+                Width="79"                                  
+                HorizontalAlignment="Center"
+                Foreground="White"
+                material:HintAssist.Hint="Border"
+                material:HintAssist.HelperText="Choose border"
+                ItemsSource="{Binding BorderTypeList}"
+                SelectedItem="{Binding BorderType, Mode=TwoWay}"                                   
+                IsSynchronizedWithCurrentItem="True">
+            </ComboBox>
+
+            <ComboBox 
+                Grid.Row="1"                                           
+                HorizontalAlignment="Center"
+                Foreground="White"
+                material:HintAssist.Hint="Mask"
+                material:HintAssist.HelperText="Choose mask"
+                ItemsSource="{Binding MaskList}"
+                SelectedItem="{Binding Mask, Mode=TwoWay}"                                   
+                IsSynchronizedWithCurrentItem="True"
+                Visibility="{Binding CustomMaskInputVisible, 
+                            Converter={StaticResource InverseBoolToVisConverter}}">
+            </ComboBox>
+
+            <Grid
+              HorizontalAlignment="Center"
+              Visibility="{Binding CustomMaskInputVisible, 
+                        Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <TextBox Grid.Row="0" Grid.Column="0" 
+                     Text="{Binding Mask.i1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0"
+                     MinWidth="20"
+                     Foreground="White" />
+                <TextBox Grid.Row="0" Grid.Column="1" 
+                     Text="{Binding Mask.i2, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+                <TextBox Grid.Row="0" Grid.Column="2" 
+                     Text="{Binding Mask.i3, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+                <TextBox Grid.Row="1" Grid.Column="0" 
+                     Text="{Binding Mask.i4, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+                <TextBox Grid.Row="1" Grid.Column="1" 
+                     Text="{Binding Mask.i5, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+                <TextBox Grid.Row="1" Grid.Column="2" 
+                     Text="{Binding Mask.i6, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+                <TextBox Grid.Row="2" Grid.Column="0" 
+                     Text="{Binding Mask.i7, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+                <TextBox Grid.Row="2" Grid.Column="1" 
+                     Text="{Binding Mask.i8, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+                <TextBox Grid.Row="2" Grid.Column="2" 
+                     Text="{Binding Mask.i9, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            </Grid>
+        </StackPanel>
+
+       
+        <StackPanel Grid.Row="1"
+                    Margin="0 17 0 0">
+            <Button
+                IsDefault="True"
+                Foreground="White"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                ToolTip="Accept"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
+                <Button.CommandParameter>
+                    <system:Boolean>True</system:Boolean>
+                </Button.CommandParameter>
+                ACCEPT
+            </Button>
+            <Button  
+                IsCancel="True"
+                Foreground="White"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                ToolTip="Cancel"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}" >
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
+                CANCEL
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,12 +1,10 @@
 ﻿using ApoCore;
 using static ApoCore.EmguOperations;
-using static ApoCore.ImageOperations;
-using static ApoCore.ImageModel;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms;
 using System.Windows.Input;
 using MaterialDesignThemes.Wpf;
+using System.IO;
 
 namespace ApoUI
 {
@@ -18,26 +16,40 @@ namespace ApoUI
         #region Constructors
 
         /// <summary>
-        /// Default Constructor
+        /// Constructor
         /// </summary>
-        public ImageViewModel()
-        {
-            //CurrentSideMenuContent = SideMenuModel.Histogram;
-            SideMenuVisible = false;
-        }
-
-        public ImageViewModel(string imagePath)
+        /// <param name="imagePath"></param>
+        /// <param name="dialogGuid"></param>
+        public ImageViewModel(string imagePath, string dialogGuid)
         {
             ImagePath = imagePath;
             ImageModel = new ImageModel(ImagePath);
             Image = ImageModel.Image;
-            SelectedChannel = ImageModel.HistogramData[0];             
+            SelectedChannel = ImageModel.HistogramData[0];
+            DialogGuid = dialogGuid;
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="imageModel"></param>
+        /// <param name="name"></param>
+        /// <param name="dialogGuid"></param>
+        public ImageViewModel(ImageModel imageModel, string name, string dialogGuid)
+        {
+            ImageModel = imageModel;
+            Image = ImageModel.Image;
+            ImagePath = null;
+            ImageName = name;
+            SelectedChannel = ImageModel.HistogramData[0];
+            DialogGuid = dialogGuid;
         }
 
         #endregion
 
         #region Public Properties   
 
+        // image model
         public ImageModel ImageModel
         {
             get => imagemodel;
@@ -48,6 +60,9 @@ namespace ApoUI
                 OnPropertyChanged();
             }
         }
+        // back of ImageModel, used before performing operation on ImageModel
+        public ImageModel BackupModel;
+        // image
         public Bitmap Image
         {
             get => image;
@@ -57,29 +72,35 @@ namespace ApoUI
                 ImageModel.Image = image;
                 UpdateHistogram();
                 OnPropertyChanged();
+                //OnPropertyChanged(nameof(ImageModel));
             }
         }
+        // backup of an image, used before performing operation on Image
+        public Bitmap backupimage;
+        // path of an image
         public string ImagePath
         {
             get => imagepath;
             set
             {
                 if (imagepath == value) return;
-                imagepath = value; ;
+                imagepath = value;
+                ImageName = Path.GetFileNameWithoutExtension(ImagePath);
                 OnPropertyChanged();
             }
         }
-        
-        public bool SideMenuVisible
+        // name of an image
+        public string ImageName
         {
-            get => sidemenuvisible;
+            get => imagename;
             set
             {
-                if (sidemenuvisible == value) return;
-                sidemenuvisible = value;
+                if (imagename == value) return;
+                imagename = value;
                 OnPropertyChanged();
             }
         }
+        // currently selected channel of an image
         public HistogramModel SelectedChannel
         {
             get => _SelectedChannel;
@@ -91,7 +112,8 @@ namespace ApoUI
                 OnPropertyChanged();
             }
         }
-        public List<string> Labels = new List<string>();
+        // labels for X axis of chart
+        public List<string> Labels { get; private set; } = new List<string>();
         public int[] Series
         {
             get => series;
@@ -102,6 +124,8 @@ namespace ApoUI
                 OnPropertyChanged();
             }
         }
+        // id of DialogHost, allows controling dialogs in multiple windows
+        public string DialogGuid { get; set; }
 
         #endregion
 
@@ -109,48 +133,48 @@ namespace ApoUI
 
         private ImageModel imagemodel;
         private Bitmap image;
-        private Bitmap backupimage;
         private string imagepath;
-               
-        private HistogramModel _SelectedChannel;
-        private bool sidemenuvisible = false;
-        // Side menu control related properties, not yet implemented
-        //private SideMenuModel currentsidemenucontent;
-
+        private string imagename;               
+        private HistogramModel _SelectedChannel;        
         private int[] series;
 
         #endregion
 
         #region Commands
 
+        public ICommand ShowHistogramDataCommand => new RelayCommand(ShowHistogramData);
         public ICommand ConvertToGrayscaleCommand => new RelayCommand(ConvertToGrayscale);
         public ICommand NegationCommand => new RelayCommand(Negation);
         public ICommand ThresholdingCommand => new RelayCommand(Thresholding);
         public ICommand PosterizeCommand => new RelayCommand(Posterize);
         public ICommand EqualizeCommand => new RelayCommand(Equalize);
         public ICommand StretchCommand => new RelayCommand(Stretch);
-        
+        public ICommand StretchCustomRangeCommand => new RelayCommand(StretchCustomRange);
+
         public ICommand BlurCommand => new RelayCommand(Blur);
         public ICommand GaussianBlurCommand => new RelayCommand(GaussianBlur);
         public ICommand SobelCommand => new RelayCommand(Sobel);
         public ICommand LaplacianCommand => new RelayCommand(Laplacian);
         public ICommand CannyCommand => new RelayCommand(Canny);
         public ICommand SharpeningCommand => new RelayCommand(Sharpening);
-
-        public ICommand AddCommand => new RelayCommand(Add);
-        public ICommand SubtractCommand => new RelayCommand(Subtract);
-        public ICommand BlendCommand => new RelayCommand(Blend);
-        public ICommand AndCommand => new RelayCommand(And);
-        public ICommand OrCommand => new RelayCommand(Or);
+        public ICommand SharpeningPrewittCommand => new RelayCommand(SharpeningPrewitt);
+        public ICommand SharpeningCustomCommand => new RelayCommand(SharpeningCustom);
+        public ICommand MedianFilterCommand => new RelayCommand(MedianFilter);
         public ICommand NotCommand => new RelayCommand(Not);
-        public ICommand XorCommand => new RelayCommand(XorOperation);
 
         public ICommand MorphologyCommand => new RelayCommand(Morphology);
-        public ICommand FiltrationTwoCommand => new RelayCommand(FiltrationTwo);
+        public ICommand FiltrationOneStepCommand => new RelayCommand(FiltrationOneStep);
+        public ICommand FiltrationTwoStepCommand => new RelayCommand(FiltrationTwoStep);
         public ICommand SkeletonCommand => new RelayCommand(Skeleton);
 
         public ICommand OtsuThresholdingCommand => new RelayCommand(OtsuThresholding);
         public ICommand AdaptiveThresholdingCommand => new RelayCommand(AdaptiveThresholding);
+        public ICommand WatershedCommand => new RelayCommand(Watershed);
+
+        public ICommand FeatureVectorCommand => new RelayCommand(FeatureVector);
+        public ICommand SvmCommand => new RelayCommand(Svm);
+
+        public ICommand ContrastEnhancementCommand => new RelayCommand(ContrastEnhancement);
 
         #endregion
 
@@ -164,10 +188,17 @@ namespace ApoUI
             if (ImageModel.IsColorful == false) return;
             else
             {
-                ImageModel.ToGrayScale();
-                ImageModel.IsColorful = false;               
-                Image = ImageModel.Image;
-                SelectedChannel = ImageModel.HistogramData[0];
+                try
+                {
+                    ImageModel.ToGrayScale();
+                    ImageModel.IsColorful = false;
+                    Image = ImageModel.Image;
+                    SelectedChannel = ImageModel.HistogramData[0];
+                }
+                catch (System.Exception)
+                {
+                    ShowMessage("Image not supported for this operation.");
+                }                
             }           
         }
 
@@ -176,35 +207,92 @@ namespace ApoUI
         /// </summary>
         private void Negation()
         {
-            ImageModel = ImageModelOperations.Negation(ImageModel);
-            Image = ImageModel.Image;
+            try
+            {
+                ImageModel = ImageModelOperations.Negation(ImageModel);
+                Image = ImageModel.Image;
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }
         }
 
         /// <summary>
-        /// Performs thresholding operation
+        /// Opens <see cref="HistogramTableDialog"/>
+        /// </summary>
+        public async void ShowHistogramData()
+        {
+            try
+            {
+                if (SelectedChannel != null)
+                {
+                    var view = new HistogramTableDialog()
+                    {
+                        DataContext = new HistogramTableViewModel(SelectedChannel)
+                    };
+                    await DialogHost.Show(view, DialogGuid);
+                }
+            }
+            catch (System.InvalidOperationException) { }
+        }
+
+        /// <summary>
+        /// Opens <see cref="ThresholdingDialog"/>
         /// </summary>
         private async void Thresholding()
         {
-            backupimage = Image;
-            var view = new ThresholdingDialog()
+            try
             {
-                DataContext = new ThresholdingOperationViewModel(this)
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+                backupimage = Image;
+                BackupModel = ImageModel;
+                var view = new ThresholdingDialog()
+                {
+                    DataContext = new ThresholdingDialogViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandlerImageModel);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }           
         }
 
         /// <summary>
-        /// Performs posterize operation
+        /// Opens <see cref="PosterizeDialog"/>
         /// </summary>
-        private void Posterize()
+        private async void Posterize()
         {
-            ImageModel = ImageModelOperations.Posterize(ImageModel);
-            Image = ImageModel.Image;
+            try
+            {
+                backupimage = Image;
+                BackupModel = ImageModel;
+                var view = new PosterizeDialog()
+                {
+                    DataContext = new PosterizeOperationViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandlerImageModel);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }           
         }
 
+        /// <summary>
+        /// Performs equalize operation
+        /// </summary>
         private void Equalize()
         {
-            MessageBox.Show("Not implemented yet :(");
+            try
+            {
+                ImageModel = ImageModelOperations.Equalization(ImageModel);
+                Image = ImageModel.Image;
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }
         }
 
         /// <summary>
@@ -212,213 +300,412 @@ namespace ApoUI
         /// </summary>
         private void Stretch()
         {
-            ImageModel = ImageModelOperations.HistogramStretch(ImageModel);
-            Image = ImageModel.Image;
+            try
+            {
+                ImageModel = ImageModelOperations.HistogramStretch(ImageModel);
+                Image = ImageModel.Image;
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }            
         }
 
         /// <summary>
-        /// Performs blur operation
+        /// Opens <see cref="StretchingDialog"/>
+        /// </summary>
+        private async void StretchCustomRange()
+        {
+            try
+            {
+                backupimage = Image;
+                BackupModel = ImageModel;
+                var view = new StretchingDialog()
+                {
+                    DataContext = new StretchingDialogViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandlerImageModel);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }
+        }
+
+        /// <summary>
+        /// Opens <see cref="BorderDialog"/> with <see cref="BorderTypeViewModel.BorderTypeOperations.Blur"/> parameter
         /// </summary>
         private async void Blur()
         {
-            backupimage = Image;
-            var view = new BorderDialog()
+            try
             {
-                DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Blur)
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+                backupimage = Image;
+                var view = new BorderDialog()
+                {
+                    DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Blur)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }
         }
 
         /// <summary>
-        /// Performs gaussian blur operation
+        /// Opens <see cref="BorderDialog"/> with <see cref="BorderTypeViewModel.BorderTypeOperations.GaussianBlur"/> parameter
         /// </summary>
         private async void GaussianBlur()
         {
-            backupimage = Image;
-            var view = new BorderDialog()
+            try
             {
-                DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.GaussianBlur)
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+                backupimage = Image;
+                var view = new BorderDialog()
+                {
+                    DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.GaussianBlur)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }
         }
 
+        /// <summary>
+        /// Opens <see cref="BorderDialog"/> with <see cref="BorderTypeViewModel.BorderTypeOperations.Sobel"/> parameter
+        /// </summary>
         private async void Sobel()
         {
-            backupimage = Image;
-            var view = new BorderDialog()
+            try
             {
-                DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Sobel)
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+                backupimage = Image;
+                var view = new BorderDialog()
+                {
+                    DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Sobel)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }
         }
 
+        /// <summary>
+        /// Opens <see cref="BorderDialog"/> with <see cref="BorderTypeViewModel.BorderTypeOperations.Laplacian"/> parameter
+        /// </summary>
         private async void Laplacian()
         {
-            backupimage = Image;
-            var view = new BorderDialog()
+            try
             {
-                DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Laplacian)
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
-        }
-
-        private void Canny()
-        {
-            ImageModel.Image = EmguOperations.Canny(ImageModel.Image);
-            Image = ImageModel.Image;
-        }
-
-        private void Sharpening()
-        {
-            ImageModel.Image = LinearSharpening(ImageModel.Image);
-            Image = ImageModel.Image;
-        }
-
-        private void Add()
-        {
-            OpenFileDialog openFile = new();
-            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                Bitmap secondImage = new(openFile.FileName);
-                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Add, secondImage);
-                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Add, secondImage);
+                backupimage = Image;
+                var view = new BorderDialog()
+                {
+                    DataContext = new BorderTypeViewModel(this, BorderTypeViewModel.BorderTypeOperations.Laplacian)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
             }
-            Image = ImageModel.Image;
-        }
-
-        private void Subtract()
-        {
-            OpenFileDialog openFile = new();
-            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            catch (System.Exception)
             {
-                Bitmap secondImage = new(openFile.FileName);
-                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Subtract, secondImage);
-                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Subtract, secondImage);
-            }
-            Image = ImageModel.Image;
+                ShowMessage("Image not supported for this operation.");
+            }           
         }
 
-        private void Blend()
+        /// <summary>
+        /// Opens <see cref="CannyDialog"/>
+        /// </summary>
+        private async void Canny()
         {
-            OpenFileDialog openFile = new();
-            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            try
             {
-                Bitmap secondImage = new(openFile.FileName);
-                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Blend, secondImage);
-                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Blend, secondImage);
+                backupimage = Image;
+                var view = new CannyDialog()
+                {
+                    DataContext = new CannyViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
             }
-            Image = ImageModel.Image;
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }           
         }
 
-        private void And()
+        /// <summary>
+        /// Opens <see cref="UniversalLinearOperationDialog"/> with <see cref="UniversalLinearOperationViewModel.LinearOperationMasks.Laplacian"/> parameter
+        /// </summary>
+        private async void Sharpening()
         {
-            OpenFileDialog openFile = new();
-            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            //ImageModel.Image = LinearSharpening(ImageModel.Image);
+            //Image = ImageModel.Image;
+            try
             {
-                Bitmap secondImage = new(openFile.FileName);
-                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.And, secondImage);
-                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.And, secondImage);
+                backupimage = Image;
+                var view = new UniversalLinearOperationDialog()
+                {
+                    DataContext = new UniversalLinearOperationViewModel(this, UniversalLinearOperationViewModel.LinearOperationMasks.Laplacian)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
             }
-            Image = ImageModel.Image;
-            //OnPropertyChanged(nameof(Image));
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }            
         }
 
-        private void Or()
+        /// <summary>
+        /// Opens <see cref="UniversalLinearOperationDialog"/> with <see cref="UniversalLinearOperationViewModel.LinearOperationMasks.Prewitt"/> parameter
+        /// </summary>
+        private async void SharpeningPrewitt()
         {
-            OpenFileDialog openFile = new();
-            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            try
             {
-                Bitmap secondImage = new(openFile.FileName);
-                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Or, secondImage);
-                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Or, secondImage);
+                backupimage = Image;
+                var view = new UniversalLinearOperationDialog()
+                {
+                    DataContext = new UniversalLinearOperationViewModel(this, UniversalLinearOperationViewModel.LinearOperationMasks.Prewitt)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
             }
-            Image = ImageModel.Image;
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }           
         }
 
+        /// <summary>
+        /// Opens <see cref="UniversalLinearOperationDialog"/> with <see cref="UniversalLinearOperationViewModel.LinearOperationMasks.Custom"/> parameter
+        /// </summary>
+        private async void SharpeningCustom()
+        {
+            try
+            {
+                backupimage = Image;
+                var view = new UniversalLinearOperationDialog()
+                {
+                    DataContext = new UniversalLinearOperationViewModel(this, UniversalLinearOperationViewModel.LinearOperationMasks.Custom)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }            
+        }
+
+        /// <summary>
+        /// Opens <see cref="MedianBlurDialog"/>
+        /// </summary>
+        private async void MedianFilter()
+        {
+            try
+            {
+                backupimage = Image;
+                var view = new MedianBlurDialog()
+                {
+                    DataContext = new MedianBlurOperationViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }           
+        }
+
+        /// <summary>
+        /// Performs NOT operation on image
+        /// </summary>
         private void Not()
         {
-            //ImageModel.Image = ImageModel.Image.ArithmeticOperations(operationType: ArithmeticOperationType.Not);
-            ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Not);
-            Image = ImageModel.Image;
-        }
-
-        private void XorOperation()
-        {
-            //var view = new PointOperationsDialog()
-            //{
-            //    DataContext = new PointOperationsViewModel(ImageModel)
-            //};
-            //view.Show();
-            OpenFileDialog openFile = new();
-            openFile.Filter = "Image files (*.jpg;*jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
-            if (openFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            try
             {
-                Bitmap secondImage = new(openFile.FileName);
-                //ImageModel.Image = ImageModel.Image.ArithmeticOperations(ArithmeticOperationType.Xor, secondImage);
-                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Xor, secondImage);
+                ImageModel.Image = ArithmeticOperations(ImageModel.Image, ArithmeticOperationType.Not);
+                Image = ImageModel.Image;
             }
-            Image = ImageModel.Image;
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }           
         }
 
+        /// <summary>
+        /// Opens <see cref="MorphologyDialog"/>
+        /// </summary>
         private async void Morphology()
         {
-            backupimage = Image;
-            var view = new MorphologyDialog()
+            try
             {
-                DataContext = new MorphologyOperationViewModel(this)
-            };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);            
+                backupimage = Image;
+                var view = new MorphologyDialog()
+                {
+                    DataContext = new MorphologyOperationViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }                       
         }
 
-        private void FiltrationTwo()
+        /// <summary>
+        /// Opens <see cref="OneStepFiltrationDialog"/>
+        /// </summary>
+        private async void FiltrationOneStep()
         {
-            Image = FiltrationTwoStep(Image);
+            try
+            {
+                backupimage = Image;
+                var view = new OneStepFiltrationDialog()
+                {
+                    DataContext = new OneStepFiltrationViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }
         }
 
+        /// <summary>
+        /// Opens <see cref="TwoStepFiltrationDialog"/>
+        /// </summary>
+        private async void FiltrationTwoStep()
+        {
+            try
+            {
+                backupimage = Image;
+                var view = new TwoStepFiltrationDialog()
+                {
+                    DataContext = new TwoStepFiltrationViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }          
+        }
+
+        /// <summary>
+        /// Opens <see cref="SkeletonDialog"/>
+        /// </summary>
         private async void Skeleton()
         {
-            backupimage = Image;
-            var view = new SkeletonDialog()
+            try
             {
-                DataContext = new SkeletonOperationViewModel(this)
+                backupimage = Image;
+                var view = new SkeletonDialog()
+                {
+                    DataContext = new SkeletonOperationViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }            
+        }
+
+        /// <summary>
+        /// Opens <see cref="OtsuThresholdingDialog"/>
+        /// </summary>
+        private async void OtsuThresholding()
+        {
+            try
+            {
+                backupimage = Image;
+                var view = new OtsuThresholdingDialog()
+                {
+                    DataContext = new OtsuThresholdingOperationViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }           
+        }
+
+        /// <summary>
+        /// Opens <see cref="AdaptiveThresholdingDialog"/>
+        /// </summary>
+        private async void AdaptiveThresholding()
+        {
+            try
+            {
+                backupimage = Image;
+                var view = new AdaptiveThresholdingDialog()
+                {
+                    DataContext = new AdaptiveThresholdingOperationViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }           
+        }
+
+        /// <summary>
+        /// Performs watershed segmentation on image
+        /// </summary>
+        private void Watershed()
+        {
+            try
+            {
+                Image = EmguOperations.Watershed(Image);
+            }
+            catch (System.Exception)
+            {
+                ShowMessage("Image not supported for this operation.");
+            }
+        }
+
+        /// <summary>
+        /// Opens <see cref="FeatureVectorDialog"/>
+        /// </summary>
+        private async void FeatureVector()
+        {
+            var view = new FeatureVectorDialog()
+            {
+                DataContext = new FeatureVectorViewModel(Image)
             };
-            var result = await DialogHost.Show(view, "RootDialog", ClosingEventHandler);
+            await DialogHost.Show(view, DialogGuid);
         }
 
-        private void OtsuThresholding()
+        private void Svm()
         {
-            ImageModel.Image = EmguOperations.OtsuThresholding(ImageModel.Image, 126);
-            Image = ImageModel.Image;
+            throw new System.NotImplementedException();
         }
 
-        private void AdaptiveThresholding()
+        /// <summary>
+        /// Opens <see cref="ContrastEnhancementDialog"/>
+        /// </summary>
+        private async void ContrastEnhancement()
         {
-            ImageModel.Image = EmguOperations.AdaptiveThresholding(ImageModel.Image);
-            Image = ImageModel.Image;
-            //ImageModel.Image = EmguOperations.Test(ImageModel.Image);
-            //Image = ImageModel.Image;
+            try
+            {
+                backupimage = Image;
+                BackupModel = ImageModel;
+                var view = new ContrastEnhancementDialog()
+                {
+                    DataContext = new ContrastEnhancementViewModel(this)
+                };
+                var result = await DialogHost.Show(view, DialogGuid, ClosingEventHandler);
+            }
+            catch (System.Exception)
+            {
+                //ShowMessage("Image not supported for this operation.");
+            }
         }
 
         #endregion
 
-        #region Command methods - UI related
-
-        /// <summary>
-        /// Puts histogram data on the chart
-        /// </summary>
-        private void PlotHistogram(HistogramModel selecteditem)
-        {
-            for (int i = 0; i <= 255; i++)
-            {
-                Labels.Add(i.ToString());
-            }
-            Series = selecteditem.PlotData;
-        }
+        #region Helpers
 
         /// <summary>
         /// Updates histogram after performing operation on image
@@ -430,8 +717,26 @@ namespace ApoUI
             {
                 if (item.Channel == SelectedChannel?.Channel) SelectedChannel = item;
             }
+            OnPropertyChanged(nameof(Series));
         }
 
+        /// <summary>
+        /// Puts histogram data on the chart
+        /// </summary>
+        private void PlotHistogram(HistogramModel selecteditem)
+        {
+            for (int i = 0; i <= 255; i++)
+            {
+                Labels.Add(i.ToString());
+            }
+            Series = selecteditem?.PlotData;
+        }
+
+        /// <summary>
+        /// Intercepts closing dialog event. If user clicked cancel restores image from <see cref="backupimage"/>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
         private void ClosingEventHandler(object sender, DialogClosingEventArgs eventArgs)
         {
             if (eventArgs.Parameter is bool parameter &&
@@ -439,10 +744,57 @@ namespace ApoUI
             else Image = backupimage;
         }
 
+        /// <summary>
+        /// Opens <see cref="MessageDialog"/> with custom text
+        /// </summary>
+        /// <param name="message"></param>
+        private async void ShowMessage(string message)
+        {
+            var view = new MessageDialog()
+            {
+                DataContext = new MessageDialogViewModel(message)
+            };
+            await DialogHost.Show(view, DialogGuid);
+
+        }
+
+        /// <summary>
+        /// Intercepts closing dialog event. If user clicked cancel restores image from <see cref="BackupModel"/>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        private void ClosingEventHandlerImageModel(object sender, DialogClosingEventArgs eventArgs)
+        {
+            if (eventArgs.Parameter is bool parameter && parameter == true) return;
+            else
+            {
+                ImageModel = BackupModel;
+                Image = BackupModel.Image;
+            }
+        }
+
         #endregion
+
+        /// <summary>
+        /// Allows changing <see cref="SelectedChannel"/> for channel == <paramref name="channel"/>
+        /// </summary>
+        /// <param name="channel"></param>
+        public void SelectChannel(ChannelModel channel)
+        {
+            foreach (var item in ImageModel.HistogramData)
+            {
+                if (item.Channel == channel) SelectedChannel = item;
+            }
+            OnPropertyChanged(nameof(Series));
+        }
+
+        /// <summary>
+        /// ToString returning name of an image
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return ImageName;
+        }
     }
 }
-
-
-// TODO: poprawic zapis, karty/konroler okien
-// https://web.csulb.edu/~pnguyen/cecs475/pdf/closingwindowmvvm.pdf

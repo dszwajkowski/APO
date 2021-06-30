@@ -9,7 +9,7 @@ namespace ApoUI
 {
     
     /// <summary>
-    /// View model for morphology operation dialog
+    /// View model for operations with border type parameter
     /// </summary>
     public class BorderTypeViewModel
     {
@@ -26,6 +26,11 @@ namespace ApoUI
 
         #region Constructor
 
+        /// <summary>
+        /// Construcotr
+        /// </summary>
+        /// <param name="window"></param>
+        /// <param name="borderTypeOperation"></param>
         public BorderTypeViewModel(ImageViewModel window, BorderTypeOperations borderTypeOperation)
         {
             this.Parent = window;
@@ -54,14 +59,17 @@ namespace ApoUI
                 BorderType.Reflect,
                 BorderType.Replicate,
             };
+            OperationCommand.Execute(_Action);
         }
 
         #endregion
 
         #region Public Properties   
 
+        // viewmodel that opened dialog that uses this viewmodel
         public ImageViewModel Parent;
 
+        // Currently selected border type
         public BorderType BorderType
         {
             get => _BorderType;
@@ -73,44 +81,59 @@ namespace ApoUI
                 OperationCommand.Execute(_Action);
             }
         }
+        // List of all border types
         public ObservableCollection<BorderType> BorderTypeList { get; set; }
 
         #endregion
 
         #region Private fields
 
+        // Operation to perform
         private Action _Action;
         private BorderType _BorderType = BorderType.Isolated;
         private Bitmap _UneditedImage;
 
         #endregion
 
-        #region Command(s)
+        #region Commands
 
+        // Operation to perform
         public ICommand OperationCommand;
 
         #endregion
 
         #region Methods
 
+        /// <summary>
+        /// Performs blur operation
+        /// </summary>
         private void Blur()
         {
             Parent.Image = _UneditedImage;
             Parent.Image = EmguOperations.Blur(Parent.Image, BorderType);
         }
 
+        /// <summary>
+        /// Performs gaussian blur operation
+        /// </summary>
         private void GaussianBlur()
         {
             Parent.Image = _UneditedImage;
             Parent.Image = EmguOperations.GaussianBlur(Parent.Image, BorderType);
         }
 
+        /// <summary>
+        /// Performs edge detection operation using Sobel
+        /// </summary>
         private void Sobel()
         {
             Parent.Image = _UneditedImage;
             Parent.Image = EmguOperations.Sobel(Parent.Image, BorderType);
         }
 
+        /// <summary>
+        /// Performs edge detection operation using Laplacian
+        /// </summary>
         private void Laplacian()
         {
             Parent.Image = _UneditedImage;

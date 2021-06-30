@@ -1,0 +1,182 @@
+﻿<UserControl x:Class="ApoUI.OneStepFiltrationDialog"
+             xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Background="#263238"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ApoUI"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             MinWidth="200">
+    <Grid Margin="17">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <ComboBox Grid.Row="0"
+                Width="79"                                  
+                HorizontalAlignment="Center"
+                Foreground="White"
+                material:HintAssist.Hint="Border"
+                material:HintAssist.HelperText="Choose border"
+                ItemsSource="{Binding BorderTypeList}"
+                SelectedItem="{Binding BorderType, Mode=TwoWay}"                                   
+                IsSynchronizedWithCurrentItem="True">
+        </ComboBox>
+
+        <Grid Grid.Row="1"
+              Margin="0 17 0 0"
+              HorizontalAlignment="Center"
+              Visibility="{Binding CustomMaskInputVisible, 
+                        Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <TextBox Grid.Row="0" Grid.Column="0" 
+                     Text="{Binding Mask1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0"
+                     MinWidth="20"
+                     Foreground="White" />
+            <TextBox Grid.Row="0" Grid.Column="1" 
+                     Text="{Binding Mask2, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="0" Grid.Column="2" 
+                     Text="{Binding Mask3, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="0" Grid.Column="3" 
+                     Text="{Binding Mask4, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="0" Grid.Column="5" 
+                     Text="{Binding Mask5, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="1" Grid.Column="0" 
+                     Text="{Binding Mask6, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="1" Grid.Column="1" 
+                     Text="{Binding Mask7, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="1" Grid.Column="2" 
+                     Text="{Binding Mask8, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="1" Grid.Column="3" 
+                     Text="{Binding Mask9, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="1" Grid.Column="4" 
+                     Text="{Binding Mask10, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="2" Grid.Column="0" 
+                     Text="{Binding Mask11, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="2" Grid.Column="1" 
+                     Text="{Binding Mask12, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="2" Grid.Column="2" 
+                     Text="{Binding Mask13, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="2" Grid.Column="3" 
+                     Text="{Binding Mask14, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="2" Grid.Column="4" 
+                     Text="{Binding Mask15, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="3" Grid.Column="0" 
+                     Text="{Binding Mask16, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="3" Grid.Column="1" 
+                     Text="{Binding Mask17, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="3" Grid.Column="2" 
+                     Text="{Binding Mask18, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="3" Grid.Column="3" 
+                     Text="{Binding Mask19, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="3" Grid.Column="4" 
+                     Text="{Binding Mask20, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="4" Grid.Column="0" 
+                     Text="{Binding Mask21, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="4" Grid.Column="1" 
+                     Text="{Binding Mask22, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="4" Grid.Column="2" 
+                     Text="{Binding Mask23, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="4" Grid.Column="3" 
+                     Text="{Binding Mask24, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+            <TextBox Grid.Row="4" Grid.Column="4" 
+                     Text="{Binding Mask25, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0 0 5 0" 
+                     MinWidth="20" />
+        </Grid>
+
+
+        <StackPanel Grid.Row="2"
+                    Margin="0 17 0 0">
+            <Button
+                IsDefault="True"
+                Foreground="White"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                ToolTip="Accept"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}">
+                <Button.CommandParameter>
+                    <system:Boolean>True</system:Boolean>
+                </Button.CommandParameter>
+                ACCEPT
+            </Button>
+            <Button  
+                IsCancel="True"
+                Foreground="White"
+                Style="{StaticResource MaterialDesignFlatButton}"
+                ToolTip="Cancel"
+                Command="{x:Static wpf:DialogHost.CloseDialogCommand}" >
+                <Button.CommandParameter>
+                    <system:Boolean>False</system:Boolean>
+                </Button.CommandParameter>
+                CANCEL
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

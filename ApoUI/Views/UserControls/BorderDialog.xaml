@@ -12,26 +12,25 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              MinWidth="200">
-    <Grid>
+    <Grid Margin="17">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <ComboBox 
-            Grid.Row="0"
-            Margin="17 40 0 17"
-            Width="72"                                  
-            HorizontalAlignment="Left"
+        <ComboBox Grid.Row="0"                               
+            HorizontalAlignment="Center"
             Foreground="White"
-            material:HintAssist.Hint="Operation"
-            material:HintAssist.HelperText="Select operation"
+            material:HintAssist.Hint="Border"
+            material:HintAssist.HelperText="Choose border"
+            Width="70"
             ItemsSource="{Binding BorderTypeList}"
             SelectedItem="{Binding BorderType, Mode=TwoWay}"                                   
             IsSynchronizedWithCurrentItem="True">
         </ComboBox>
 
-        <StackPanel Grid.Row="1">
+        <StackPanel Grid.Row="1"
+                    Margin="0 17 0 0">
             <Button
                 IsDefault="True"
                 Foreground="White"

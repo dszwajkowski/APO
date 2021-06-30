@@ -54,5 +54,13 @@
         </Style.Triggers>
     </Style>
 
+    <Style TargetType="{x:Type CheckBox}" x:Key="CheckBoxWhite" BasedOn="{StaticResource MaterialDesignDarkCheckBox}" >
+        <Style.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="White" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
     <!--#endregion-->
 </ResourceDictionary>

@@ -11,7 +11,7 @@
              d:DesignHeight="450" d:DesignWidth="800"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
              Background="#263238">
-    <Grid>
+    <Grid Margin="17 0 17 17">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
@@ -21,51 +21,51 @@
 
         <StackPanel Grid.Row="0"
                     Orientation="Horizontal"
-                    Margin="17 40 17 17">
+                    Margin="0 0 0 17">
             <Slider Style="{StaticResource MaterialDesignDiscreteSlider}" 
                     Width="550"
-                    Value="{Binding Threshold}"
+                    Value="{Binding Threshold, Mode=OneWay}"
+                    PreviewMouseUp="Slider_PreviewMouseUp_Threshold"    
                     Orientation="Horizontal"                                        
-                    ToolTip="TODO"
+                    ToolTip="Choose window size"
                     TickFrequency="10"
                     TickPlacement="BottomRight"
                     Minimum="0"
+                    Maximum="254"
+                    Foreground="White"/>
+            <TextBox Text="{Binding Threshold, Mode=TwoWay, Delay=300, UpdateSourceTrigger=PropertyChanged}" 
+                     Margin="10 0 0 0"
+                     Foreground="White"
+                     VerticalAlignment="Bottom"/>
+        </StackPanel>
+        
+        <CheckBox Grid.Row="1"
+                  Style="{StaticResource CheckBoxWhite}"
+                  IsChecked="{Binding KeepGrayLevels}"                  
+                  Content="Keep gray levels" />
+        
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    IsEnabled="{Binding KeepGrayLevels}">
+            <Slider Style="{StaticResource MaterialDesignDiscreteSlider}" 
+                    Width="550"
+                    Value="{Binding ThresholdMax, Mode=OneWay, FallbackValue=255}"
+                    PreviewMouseUp="Slider_PreviewMouseUp_ThresholdMax"
+                    Orientation="Horizontal"                                        
+                    ToolTip="Choose window size"
+                    TickFrequency="10"
+                    TickPlacement="BottomRight"
+                    Minimum="1"
                     Maximum="255"
-                    Foreground="White"
-                    />
-            <TextBox Text="{Binding Threshold}" 
+                    Foreground="White"/>
+            <TextBox Text="{Binding ThresholdMax, Mode=TwoWay, Delay=300, UpdateSourceTrigger=PropertyChanged}" 
                      Margin="10 0 0 0"
                      Foreground="White"
                      VerticalAlignment="Bottom"/>
         </StackPanel>
 
-        <CheckBox Grid.Row="1"
-                  IsChecked="{Binding KeepGrayLevels}"
-                  Margin="17 0 17 0"
-                  Foreground="White"                    
-                  Content="Keep gray levels" />
-
-        <StackPanel Grid.Row="2" 
-                    Margin="17 0 17 17" 
-                    Orientation="Horizontal">
-            <Slider IsEnabled="{Binding KeepGrayLevels}"
-                    Style="{StaticResource MaterialDesignDiscreteSlider}" 
-                    Width="550"
-                    Value="{Binding ThresholdMax}"
-                    Orientation="Horizontal"                                        
-                    ToolTip="TODO"
-                    TickFrequency="10"
-                    TickPlacement="BottomRight"
-                    Minimum="0"
-                    Maximum="255"
-                    Foreground="White" />
-            <TextBox Text="{Binding ThresholdMax}" 
-                     Margin="10 0 0 0" 
-                     Foreground="White"
-                     VerticalAlignment="Bottom" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="3">
+        <StackPanel Grid.Row="3"
+                    Margin="0 17 0 0">
             <Button
                 IsDefault="True"
                 Foreground="White"

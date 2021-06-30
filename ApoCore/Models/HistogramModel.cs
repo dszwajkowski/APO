@@ -1,12 +1,22 @@
-﻿namespace ApoCore
+﻿using System;
+
+namespace ApoCore
 {
+    /// <summary>
+    /// Data model for histogram
+    /// </summary>
+    [Serializable]
     public class HistogramModel
     {
         #region Public properties
 
+        // image channel
         public ChannelModel Channel { get; private set; }
+        // occurrences of each intensity/color
         public int[] PlotData { get; private set; } = new int[256];
+        // highest intensity/color
         public int Max { get; private set; } = 0;
+        // lowest intensity/color
         public int Min { get; private set; } = 255;
 
         #endregion
@@ -14,13 +24,20 @@
         #region Constructors
 
         /// <summary>
-        /// Empty constructor
+        /// Default constructor
         /// </summary>
         public HistogramModel()
         {
 
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="lut"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="channel"></param>
         public HistogramModel(int[,] lut, int width, int height, ChannelModel channel)
         {
             Channel = channel;
@@ -32,7 +49,7 @@
         #region Helpers
 
         /// <summary>
-        /// Counts occurence of each color/intensity and maximum value
+        /// Counts occurence of each color/intensity, maximum and minimum value
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>

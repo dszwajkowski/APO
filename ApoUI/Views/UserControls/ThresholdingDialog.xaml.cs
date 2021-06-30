@@ -24,5 +24,21 @@ namespace ApoUI
         {
             InitializeComponent();
         }
+
+        private void Slider_PreviewMouseUp_Threshold(object sender, MouseButtonEventArgs e)
+        {
+            if (this.DataContext != null)
+            {
+                ((dynamic)this.DataContext).Threshold = (int)((Slider)sender).Value;
+            }
+        }
+
+        private void Slider_PreviewMouseUp_ThresholdMax(object sender, MouseButtonEventArgs e)
+        {
+            if (this.DataContext != null)
+            {
+                ((dynamic)this.DataContext).ThresholdMax = (int)((Slider)sender).Value;
+            }
+        }
     }
 }
